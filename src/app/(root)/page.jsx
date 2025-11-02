@@ -31,7 +31,10 @@ const OjusCommonPage = () => {
     >
       {/* Background Video */}
       <video className="absolute inset-0 z-0 w-screen h-screen object-cover" autoPlay loop muted>
-        <source src="./ojus-bg-vid.mp4" type="video/mp4" />
+        <source
+          src="https://res.cloudinary.com/dzcxkso7f/video/upload/v1762069471/ojus-bg-vid_ympxx4.mp4"
+          type="video/mp4"
+        />
       </video>
 
       {/* Dark Overlay */}
