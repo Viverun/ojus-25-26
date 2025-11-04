@@ -6,44 +6,28 @@ import React, { useState } from "react";
 const IndoorPage = () => {
   const [selectedDay, setSelectedDay] = useState(1);
 
-  // Mock data for events - you can replace with actual data
+  // Simplified events data with only used fields
   const eventsData = {
     1: [
       {
         id: 1,
         name: "Valorant Tournament",
         banner: "/api/placeholder/400/200",
-        time: "10:00 AM - 2:00 PM",
-        description: "5v5 Competitive Tournament",
-        participants: 50,
-        prize: "₹10,000",
       },
       {
         id: 2,
         name: "Badminton Singles",
         banner: "/api/placeholder/400/200",
-        time: "3:00 PM - 6:00 PM",
-        description: "Single Elimination Tournament",
-        participants: 32,
-        prize: "₹5,000",
       },
       {
         id: 3,
         name: "Table Tennis Championship",
         banner: "/api/placeholder/400/200",
-        time: "11:00 AM - 4:00 PM",
-        description: "Best of 5 matches",
-        participants: 24,
-        prize: "₹3,000",
       },
       {
         id: 4,
         name: "Chess Masters",
         banner: "/api/placeholder/400/200",
-        time: "2:00 PM - 5:00 PM",
-        description: "Rapid Chess Tournament",
-        participants: 40,
-        prize: "₹2,000",
       },
     ],
     2: [
@@ -51,19 +35,11 @@ const IndoorPage = () => {
         id: 5,
         name: "CS:GO Showdown",
         banner: "/api/placeholder/400/200",
-        time: "11:00 AM - 3:00 PM",
-        description: "Team Deathmatch Tournament",
-        participants: 40,
-        prize: "₹8,000",
       },
       {
         id: 6,
         name: "Badminton Doubles",
         banner: "/api/placeholder/400/200",
-        time: "4:00 PM - 7:00 PM",
-        description: "Double Elimination Tournament",
-        participants: 16,
-        prize: "₹6,000",
       },
     ],
     3: [
@@ -71,76 +47,64 @@ const IndoorPage = () => {
         id: 7,
         name: "FIFA 24 Championship",
         banner: "/api/placeholder/400/200",
-        time: "12:00 PM - 5:00 PM",
-        description: "1v1 FIFA Tournament",
-        participants: 64,
-        prize: "₹7,000",
       },
       {
         id: 8,
         name: "Table Tennis Doubles",
         banner: "/api/placeholder/400/200",
-        time: "2:00 PM - 6:00 PM",
-        description: "Double Match Tournament",
-        participants: 20,
-        prize: "₹4,000",
       },
     ],
   };
 
-  const days = [1, 2, 3, 4]; // You can add more days
+  const days = [1, 2, 3, 4];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative py-16 bg-gradient-to-r from-red-500/10 to-orange-500/10">
-        <div className="container mx-auto px-4 mt-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-            Indoor Arena
-          </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Master your skills in gaming, badminton, table tennis, and chess.
-            Compete, conquer, and claim victory!
-          </p>
-          {/* Add this Back Button */}
-          <Link
-            href="/sports"
-            className="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold mt-10 py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+      <section className="relative py-20 bg-gradient-to-br from-red-600/20 via-black to-orange-600/20 border-b-4 border-red-500">
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center">
+            <h1 className="text-6xl md:text-7xl font-black mb-6 bg-gradient-to-r from-red-500 via-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight">
+              INDOOR<br />ARENA
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 font-medium">
+              MASTER YOUR SKILLS • DOMINATE THE COMPETITION • CLAIM VICTORY
+            </p>
+            <Link
+              href="/sports"
+              className="inline-block group relative bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 px-8 border-2 border-red-500 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/30"
+              style={{ clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0 100%)' }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to Sports
-          </Link>
+              <span className="relative z-10">← BACK TO SPORTS</span>
+              <div className="absolute inset-0 bg-red-500/10 group-hover:bg-red-500/20 transition-colors"></div>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Days Navigation - Full Width Buttons */}
-      <section className="py-8 bg-gray-800/50">
+      {/* Days Navigation */}
+      <section className="py-12 bg-gradient-to-r from-gray-800 to-gray-900 border-y-2 border-red-500/30">
         <div className="container mx-auto px-4">
-          <div className="bg-gray-800 rounded-2xl p-4 border border-red-500/30">
-            <div className="grid grid-cols-4 gap-2">
+          <div className="bg-gray-900 border-2 border-red-500/40 p-2">
+            <div className="grid grid-cols-4 gap-3">
               {days.map((day) => (
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day)}
-                  className={`py-4 rounded-xl font-semibold transition-all duration-300 ${
+                  className={`relative py-5 font-bold text-lg transition-all duration-300 transform hover:scale-105 border-2 ${
                     selectedDay === day
-                      ? "bg-red-500 text-white shadow-lg shadow-red-500/25 transform scale-105"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                      ? "bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/50"
+                      : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:border-red-400"
                   }`}
+                  style={{ 
+                    clipPath: `polygon(10% 0, 90% 0, 100% 100%, 0 100%)`,
+                    transform: selectedDay === day ? 'skewX(-5deg)' : 'none'
+                  }}
                 >
-                  Day {day}
+                  <span style={{ transform: selectedDay === day ? 'skewX(5deg)' : 'none' }}>
+                    DAY {day}
+                  </span>
                 </button>
               ))}
             </div>
@@ -149,69 +113,86 @@ const IndoorPage = () => {
       </section>
 
       {/* Events Grid */}
-      <section className="py-12">
+      <section className="py-16 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Events - <span className="text-red-500">Day {selectedDay}</span>
+          <h2 className="text-4xl font-black text-center mb-16 uppercase tracking-wide">
+            EVENTS - <span className="text-red-500">DAY {selectedDay}</span>
           </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {eventsData[selectedDay]?.map((event) => (
               <div
                 key={event.id}
-                className="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-red-500/50 transition-all duration-300 hover:transform hover:scale-105 group"
+                className="relative p-px text-center text-white transition-all duration-300 group w-full max-w-sm mx-auto"
+                style={{ 
+                  clipPath: 'polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%)' 
+                }}
               >
-                {/* Event Banner */}
-                <div className="h-48 bg-gradient-to-r from-red-500 to-orange-500 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                  <div className="absolute bottom-4 left-4">
-                    <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      {event.participants} Participants
-                    </span>
-                  </div>
-                </div>
+                {/* Gradient Border/Glow */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-br from-red-600 to-orange-500 opacity-70 group-hover:opacity-100 transition-opacity duration-300 blur-md group-hover:blur-lg -z-10"
+                  style={{ 
+                    clipPath: 'inherit'
+                  }}
+                ></div>
 
-                {/* Event Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2 text-white group-hover:text-red-400 transition-colors">
+                {/* Inner Card Content - Made more slender */}
+                <div 
+                  className="relative bg-gray-900/80 backdrop-blur-sm p-6 h-full flex flex-col"
+                  style={{ 
+                    clipPath: 'inherit'
+                  }}
+                >
+                  {/* Event Banner with same shape as card */}
+                  <div 
+                    className="w-full h-40 bg-amber-50 mb-6 mx-auto overflow-hidden"
+                    style={{ 
+                      clipPath: 'inherit'
+                    }}
+                  >
+                    <img
+                      src={event.banner}
+                      alt={event.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+
+                  {/* Event Name */}
+                  <h3 className="text-2xl font-black uppercase tracking-wide mb-6 text-white group-hover:text-red-400 transition-colors flex-grow">
                     {event.name}
                   </h3>
-                  <p className="text-gray-400 text-sm mb-4">
-                    {event.description}
-                  </p>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm text-gray-300">
-                        {event.time}
-                      </span>
-                    </div>
-                    <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-semibold">
-                      Prize: {event.prize}
-                    </span>
+                  {/* View Details Button */}
+                  <div className="mt-auto">
+                    <Link
+                      href={`/sports/events/${event.id}`}
+                      className="inline-block group/button relative bg-red-600 hover:bg-red-700 text-white font-black py-3 px-6 border-2 border-white/20 hover:border-white transition-all duration-300 transform hover:scale-105 uppercase tracking-wider w-full"
+                      style={{ 
+                        clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0 100%)' 
+                      }}
+                    >
+                      <span className="relative z-10">VIEW DETAILS →</span>
+                      <div 
+                        className="absolute inset-0 bg-white/10 group-hover/button:bg-white/20 transition-colors"
+                        style={{ clipPath: 'inherit' }}
+                      ></div>
+                    </Link>
                   </div>
-
-                  <Link
-                    href={`/sports/events/${event.id}`}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-center block"
-                  >
-                    Event Details
-                  </Link>
                 </div>
               </div>
             ))}
           </div>
 
           {/* No Events Message */}
-          {(!eventsData[selectedDay] ||
-            eventsData[selectedDay].length === 0) && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-lg">
-                No events scheduled for Day {selectedDay}
-              </div>
-              <div className="text-gray-500 text-sm mt-2">
-                Check back later for updates!
+          {(!eventsData[selectedDay] || eventsData[selectedDay].length === 0) && (
+            <div 
+              className="text-center py-20 border-2 border-red-500/30 bg-gray-800/50 mx-auto max-w-2xl relative"
+              style={{ clipPath: 'polygon(5% 0, 95% 0, 100% 100%, 0 100%)' }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-50"></div>
+              <div className="relative z-10">
+                <div className="text-2xl text-gray-400 font-bold mb-4">NO EVENTS SCHEDULED</div>
+                <div className="text-gray-500 text-lg">STAY TUNED FOR UPDATES!</div>
               </div>
             </div>
           )}
@@ -219,12 +200,17 @@ const IndoorPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800/80 border-t border-red-500/20 py-8">
+      <footer className="bg-gradient-to-r from-gray-900 to-black border-t-4 border-red-500 py-12">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-400">
-            Ready to compete? Choose your event and show them what you're made
-            of! 🏆
-          </p>
+          <div 
+            className="border-2 border-red-500/30 p-8 bg-gray-800/30 relative"
+            style={{ clipPath: 'polygon(3% 0, 97% 0, 100% 100%, 0 100%)' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-orange-500/5"></div>
+            <p className="text-xl text-gray-300 font-bold uppercase tracking-wide relative z-10">
+              READY TO COMPETE? CHOOSE YOUR ARENA AND SHOW THEM WHAT YOU'RE MADE OF! 🏆
+            </p>
+          </div>
         </div>
       </footer>
     </main>
