@@ -9,7 +9,7 @@ const nova = Nova_Square({
   subsets: ["latin"],
 });
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaHome, FaCalendarAlt, FaEnvelope, FaUsers, FaGem } from "react-icons/fa";
 import { FaInstagram, FaLinkedin, FaYoutube, FaXTwitter, FaFacebook } from "react-icons/fa6";
 
@@ -24,7 +24,20 @@ import {
 
 const OjusCommonPage = () => {
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // ✅ Check login state once on mount
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    setIsLoggedIn(false);
+    window.location.href = "/login";
+  };
   return (
     <section
       className={`relative overflow-hidden text-white h-screen w-screen flex flex-col justify-center items-center ${nova.className}`}
@@ -62,9 +75,22 @@ const OjusCommonPage = () => {
             </div>
           </div>
 
-          <button className="px-3 py-2 border border-black text-black bg-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400">
-            Sign Up
-          </button>
+          {/* ✅ Conditionally render Sign Up or Logout */}
+          {!isLoggedIn ? (
+            <button
+              onClick={() => (window.location.href = "/signup")}
+              className="px-3 py-2 border border-black text-black bg-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
+            >
+              Sign Up
+            </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2 border border-black text-black bg-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
+            >
+              Logout
+            </button>
+          )}
         </nav>
 
         {/* HERO SECTION */}
