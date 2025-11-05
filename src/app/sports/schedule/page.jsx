@@ -198,7 +198,7 @@ function Schedule() {
         <div
           className=" relative min-h-[300px] flex items-centre justify-center"
           style={{
-            backgroundColor: "#5C2671",
+            backgroundColor: "#5E2679",
           }}
         >
           {/* Background Image */}
