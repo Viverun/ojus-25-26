@@ -73,12 +73,18 @@ const OjusCommonPage = () => {
             <p className="text-sm sm:text-base md:text-lg opacity-80">Get ready for ojus 2025</p>
 
             <div className="flex flex-wrap gap-4 mt-4">
-              <button className="px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition">
+              <Link
+                href={"/sports"}
+                className="px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition"
+              >
                 SPORTS
-              </button>
-              <button className="px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition">
+              </Link>
+              <Link
+                href={"/cultural"}
+                className="px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition"
+              >
                 CULTURAL
-              </button>
+              </Link>
             </div>
           </motion.div>
         </div>
