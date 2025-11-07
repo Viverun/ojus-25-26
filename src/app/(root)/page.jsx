@@ -28,7 +28,7 @@ const OjusCommonPage = () => {
   };
 
   return (
-    <div className={`w-full min-h-screen text-white font-sans overflow-x-hidden ${nova.className}`}>
+    <div className={`cursor-none w-full min-h-screen text-white font-sans overflow-x-hidden ${nova.className}`}>
       {/* ------------------ SECTION 1 ------------------ */}
       <section className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <video className="absolute inset-0 w-full h-full object-cover z-0" autoPlay loop muted>
@@ -75,13 +75,13 @@ const OjusCommonPage = () => {
             <div className="flex flex-wrap gap-4 mt-4">
               <Link
                 href={"/sports"}
-                className="px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition"
+                className="cursor-none px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition"
               >
                 SPORTS
               </Link>
               <Link
                 href={"/cultural"}
-                className="px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition"
+                className="cursor-none px-5 py-2 bg-purple-500 text-white font-semibold rounded-lg text-lg hover:bg-purple-400 transition"
               >
                 CULTURAL
               </Link>
