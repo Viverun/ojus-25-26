@@ -8,6 +8,7 @@ import api from "@/api/api";
 const allEvents = {
   // Indoor Events (IDs 1-8)
   1: {
+    slug: "valorant-tournament",
     id: 1,
     name: "Valorant Tournament",
     type: "indoor",
@@ -40,6 +41,7 @@ const allEvents = {
     prize: "₹3,000",
   },
   4: {
+    slug: "chess-masters",
     id: 4,
     name: "Chess Masters",
     type: "indoor",

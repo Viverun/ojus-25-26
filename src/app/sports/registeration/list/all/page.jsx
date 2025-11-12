@@ -1,0 +1,1 @@
+// list out all the registerations
