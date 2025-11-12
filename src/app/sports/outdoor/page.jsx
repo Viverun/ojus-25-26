@@ -88,15 +88,15 @@ const OutdoorPage = () => {
         <div className="container mx-auto px-4 relative">
           <div className="text-center">
             <h1 className="text-6xl md:text-7xl font-black mb-6 bg-gradient-to-r from-green-500 via-blue-500 to-green-600 bg-clip-text text-transparent tracking-tight">
-              OUTDOOR<br />ARENA
+              OUTDOOR ARENA
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 font-medium">
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 font-medium w-full text-nowrap">
               EXPERIENCE THE THRILL • PUSH YOUR LIMITS • EMBRACE THE COMPETITION
             </p>
             <Link
               href="/sports"
               className="inline-block group relative bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 px-8 border-2 border-green-500 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/30"
-              style={{ clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0 100%)' }}
+              style={{ clipPath: "polygon(10% 0, 90% 0, 100% 100%, 0 100%)" }}
             >
               <span className="relative z-10">← BACK TO SPORTS</span>
               <div className="absolute inset-0 bg-green-500/10 group-hover:bg-green-500/20 transition-colors"></div>
@@ -119,14 +119,12 @@ const OutdoorPage = () => {
                       ? "bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/50"
                       : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:border-green-400"
                   }`}
-                  style={{ 
+                  style={{
                     clipPath: `polygon(10% 0, 90% 0, 100% 100%, 0 100%)`,
-                    transform: selectedDay === day ? 'skewX(-5deg)' : 'none'
+                    transform: selectedDay === day ? "skewX(-5deg)" : "none",
                   }}
                 >
-                  <span style={{ transform: selectedDay === day ? 'skewX(5deg)' : 'none' }}>
-                    DAY {day}
-                  </span>
+                  <span style={{ transform: selectedDay === day ? "skewX(5deg)" : "none" }}>DAY {day}</span>
                 </button>
               ))}
             </div>
@@ -140,36 +138,36 @@ const OutdoorPage = () => {
           <h2 className="text-4xl font-black text-center mb-16 uppercase tracking-wide">
             EVENTS - <span className="text-green-500">DAY {selectedDay}</span>
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {eventsData[selectedDay]?.map((event) => (
               <div
                 key={event.id}
                 className="relative p-px text-center text-white transition-all duration-300 group w-full max-w-sm mx-auto"
-                style={{ 
-                  clipPath: 'polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%)' 
+                style={{
+                  clipPath: "polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%)",
                 }}
               >
                 {/* Gradient Border/Glow - Green/Blue theme */}
-                <div 
+                <div
                   className="absolute inset-0 bg-gradient-to-br from-green-600 to-blue-500 opacity-70 group-hover:opacity-100 transition-opacity duration-300 blur-md group-hover:blur-lg -z-10"
-                  style={{ 
-                    clipPath: 'inherit'
+                  style={{
+                    clipPath: "inherit",
                   }}
                 ></div>
 
                 {/* Inner Card Content */}
-                <div 
+                <div
                   className="relative bg-gray-900/80 backdrop-blur-sm p-6 h-full flex flex-col"
-                  style={{ 
-                    clipPath: 'inherit'
+                  style={{
+                    clipPath: "inherit",
                   }}
                 >
                   {/* Event Banner with same shape as card */}
-                  <div 
+                  <div
                     className="w-full h-40 mb-6 mx-auto overflow-hidden"
-                    style={{ 
-                      clipPath: 'inherit'
+                    style={{
+                      clipPath: "inherit",
                     }}
                   >
                     <img
@@ -189,14 +187,14 @@ const OutdoorPage = () => {
                     <Link
                       href={`/sports/events/${event.id}`}
                       className="inline-block group/button relative bg-green-600 hover:bg-green-700 text-white font-black py-3 px-6 border-2 border-white/20 hover:border-white transition-all duration-300 transform hover:scale-105 uppercase tracking-wider w-full"
-                      style={{ 
-                        clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0 100%)' 
+                      style={{
+                        clipPath: "polygon(10% 0, 90% 0, 100% 100%, 0 100%)",
                       }}
                     >
                       <span className="relative z-10">VIEW DETAILS →</span>
-                      <div 
+                      <div
                         className="absolute inset-0 bg-white/10 group-hover/button:bg-white/20 transition-colors"
-                        style={{ clipPath: 'inherit' }}
+                        style={{ clipPath: "inherit" }}
                       ></div>
                     </Link>
                   </div>
@@ -207,9 +205,9 @@ const OutdoorPage = () => {
 
           {/* No Events Message - Updated styling */}
           {(!eventsData[selectedDay] || eventsData[selectedDay].length === 0) && (
-            <div 
+            <div
               className="text-center py-20 border-2 border-green-500/30 bg-gray-800/50 mx-auto max-w-2xl relative"
-              style={{ clipPath: 'polygon(5% 0, 95% 0, 100% 100%, 0 100%)' }}
+              style={{ clipPath: "polygon(5% 0, 95% 0, 100% 100%, 0 100%)" }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-blue-500/10 opacity-50"></div>
               <div className="relative z-10">
@@ -224,9 +222,9 @@ const OutdoorPage = () => {
       {/* Footer - Updated styling */}
       <footer className="bg-gradient-to-r from-gray-900 to-black border-t-4 border-green-500 py-12">
         <div className="container mx-auto px-4 text-center">
-          <div 
+          <div
             className="border-2 border-green-500/30 p-8 bg-gray-800/30 relative"
-            style={{ clipPath: 'polygon(3% 0, 97% 0, 100% 100%, 0 100%)' }}
+            style={{ clipPath: "polygon(3% 0, 97% 0, 100% 100%, 0 100%)" }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-blue-500/5"></div>
             <p className="text-xl text-gray-300 font-bold uppercase tracking-wide relative z-10">
