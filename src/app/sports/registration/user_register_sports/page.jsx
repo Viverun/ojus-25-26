@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import api from "@/api/api"; // Your axios instance with JWT
+import api from "@/api/api"; 
 
 export default function AdminRegistrationSearch() {
   const [moodleID, setMoodleID] = useState("");
