@@ -119,7 +119,7 @@ const OjusCommonPage = () => {
         </div>
       </section>
       {/* ------------------ SECTION 2 ------------------ */}
-      <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-10 md:px-20 py-16 bg-white text-black">
+      <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-10 md:px-20 py-16 bg-zinc-200 text-black">
         <div className="flex flex-col md:flex-row justify-between gap-16 w-full">
           {/* LEFT TEXT */}
           <motion.div
@@ -139,7 +139,7 @@ const OjusCommonPage = () => {
                 adding excitement and energy.
               </span>
 
-              <span>
+              <span className="hidden md:flex">
                 From dance and music to fashion, theatre, and gaming, Ojus showcases diverse student talent and embodies
                 APSIT’s cultural spirit, creating unforgettable memories for everyone who attends and experiences the
                 festival’s lively atmosphere.
@@ -195,7 +195,7 @@ const OjusCommonPage = () => {
                 students to become skilled professionals and responsible citizens.
               </span>
 
-              <span>
+              <span className="hidden md:flex">
                 The institute offers undergraduate engineering programs with modern infrastructure, advanced
                 laboratories and experienced faculty. APSIT bridges the gap between theory and practical learning
                 through industry collaborations, research, project-based education and internships, ensuring students
@@ -207,12 +207,12 @@ const OjusCommonPage = () => {
       </section>
       {/* --------- --------- SECTION 4 ------------------ */}
       <section id="highlights" style={{ width: "100vw", height: "80vh" }}>
-        <DomeGallery images={domeImages} grayscale={false} fitBasis={"max"} minRadius={1000} />
+        <DomeGallery images={domeImages} grayscale={false} fitBasis={"max"} minRadius={1100} />
       </section>
 
       {/* --------- --------- SECTION 5 ------------------ */}
       <section className="w-screen">
-        <Marquee pauseOnHover className="[--duration:20s]">
+        <Marquee pauseOnHover className="[--duration:20s]" repeat={4}>
           {[
             {
               src: "/dsa.png",
@@ -230,8 +230,40 @@ const OjusCommonPage = () => {
               src: "/itsa.png",
               alt: "ITSA Department Logo",
             },
+            {
+              src: "/dsa.png",
+              alt: "DS Department Logo",
+            },
+            {
+              src: "/csa.png",
+              alt: "CSA Department Logo",
+            },
+            {
+              src: "/aimlsa.png",
+              alt: "AIMLSA Department Logo",
+            },
+            {
+              src: "/itsa.png",
+              alt: "ITSA Department Logo",
+            },
+            {
+              src: "/dsa.png",
+              alt: "DS Department Logo",
+            },
+            {
+              src: "/csa.png",
+              alt: "CSA Department Logo",
+            },
+            {
+              src: "/aimlsa.png",
+              alt: "AIMLSA Department Logo",
+            },
+            {
+              src: "/itsa.png",
+              alt: "ITSA Department Logo",
+            },
           ]?.map((logo) => (
-            <img src={logo.src} alt={logo.alt} className="h-20" />
+            <img key={(Math.random() * 10).floor()} src={logo.src} alt={logo.alt} className="h-20" />
           ))}
         </Marquee>
       </section>

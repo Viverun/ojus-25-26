@@ -4,7 +4,7 @@ import "./globals.css";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 
 export const metadata = {
-  title: "Ojus 2025",
+  title: "Ojus 2026",
   description: "Made by the Ojus Tech Team 26",
 };
 
