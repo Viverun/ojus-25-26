@@ -263,7 +263,7 @@ const OjusCommonPage = () => {
               alt: "ITSA Department Logo",
             },
           ]?.map((logo) => (
-            <img key={(Math.random() * 10).floor()} src={logo.src} alt={logo.alt} className="h-20" />
+            <img key={Math.floor(Math.random() * 10)} src={logo.src} alt={logo.alt} className="h-20" />
           ))}
         </Marquee>
       </section>
