@@ -143,7 +143,7 @@ const OjusCommonPage = () => {
           </div>
         </section>
 
-        <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-10 md:px-20 py-16 bg-white text-black">
+        <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-10 md:px-20 py-16 bg-zinc-200 text-black">
           <div className="flex flex-col md:flex-row justify-between gap-16 w-full">
             <motion.div
               initial={{ opacity: 0, x: -60 }}
@@ -162,13 +162,13 @@ const OjusCommonPage = () => {
                   adding excitement and energy.
                 </span>
 
-                <span>
-                  From dance and music to fashion, theatre, and gaming, Ojus showcases diverse student talent and embodies
-                  APSIT’s cultural spirit, creating unforgettable memories for everyone who attends and experiences the
-                  festival’s lively atmosphere.
-                </span>
-              </p>
-            </motion.div>
+              <span className="hidden md:flex">
+                From dance and music to fashion, theatre, and gaming, Ojus showcases diverse student talent and embodies
+                APSIT’s cultural spirit, creating unforgettable memories for everyone who attends and experiences the
+                festival’s lively atmosphere.
+              </span>
+            </p>
+          </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: 60 }}
@@ -215,35 +215,79 @@ const OjusCommonPage = () => {
                   students to become skilled professionals and responsible citizens.
                 </span>
 
-                <span>
-                  The institute offers undergraduate engineering programs with modern infrastructure, advanced
-                  laboratories and experienced faculty. APSIT bridges the gap between theory and practical learning
-                  through industry collaborations, research, project-based education and internships, ensuring students
-                  are ready to meet the demands of today’s evolving technological world.
-                </span>
-              </p>
-            </motion.div>
-          </div>
-        </section>
+              <span className="hidden md:flex">
+                The institute offers undergraduate engineering programs with modern infrastructure, advanced
+                laboratories and experienced faculty. APSIT bridges the gap between theory and practical learning
+                through industry collaborations, research, project-based education and internships, ensuring students
+                are ready to meet the demands of today’s evolving technological world.
+              </span>
+            </p>
+          </motion.div>
+        </div>
+      </section>
+      {/* --------- --------- SECTION 4 ------------------ */}
+      <section id="highlights" style={{ width: "100vw", height: "80vh" }}>
+        <DomeGallery images={domeImages} grayscale={false} fitBasis={"max"} minRadius={1100} />
+      </section>
 
-        <section id="highlights" style={{ width: "100vw", height: "80vh" }}>
-          <DomeGallery images={domeImages} grayscale={false} fitBasis={"max"} minRadius={1000} />
-        </section>
-
-        <section className="w-screen">
-          <Marquee pauseOnHover className="[--duration:20s]">
-            {[
-              { src: "/dsa.png", alt: "DS Department Logo" },
-              { src: "/csa.png", alt: "CSA Department Logo" },
-              { src: "/aimlsa.png", alt: "AIMLSA Department Logo" },
-              { src: "/itsa.png", alt: "ITSA Department Logo" },
-            ]?.map((logo) => (
-              <img key={logo.src} src={logo.src} alt={logo.alt} className="h-20" />
-            ))}
-          </Marquee>
-        </section>
-      </div>
-    </AuthProvider>
+      {/* --------- --------- SECTION 5 ------------------ */}
+      <section className="w-screen">
+        <Marquee pauseOnHover className="[--duration:20s]" repeat={4}>
+          {[
+            {
+              src: "/dsa.png",
+              alt: "DS Department Logo",
+            },
+            {
+              src: "/csa.png",
+              alt: "CSA Department Logo",
+            },
+            {
+              src: "/aimlsa.png",
+              alt: "AIMLSA Department Logo",
+            },
+            {
+              src: "/itsa.png",
+              alt: "ITSA Department Logo",
+            },
+            {
+              src: "/dsa.png",
+              alt: "DS Department Logo",
+            },
+            {
+              src: "/csa.png",
+              alt: "CSA Department Logo",
+            },
+            {
+              src: "/aimlsa.png",
+              alt: "AIMLSA Department Logo",
+            },
+            {
+              src: "/itsa.png",
+              alt: "ITSA Department Logo",
+            },
+            {
+              src: "/dsa.png",
+              alt: "DS Department Logo",
+            },
+            {
+              src: "/csa.png",
+              alt: "CSA Department Logo",
+            },
+            {
+              src: "/aimlsa.png",
+              alt: "AIMLSA Department Logo",
+            },
+            {
+              src: "/itsa.png",
+              alt: "ITSA Department Logo",
+            },
+          ]?.map((logo) => (
+            <img key={Math.floor(Math.random() * 10)} src={logo.src} alt={logo.alt} className="h-20" />
+          ))}
+        </Marquee>
+      </section>
+    </div>
   );
 };
 
