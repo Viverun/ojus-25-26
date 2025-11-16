@@ -288,6 +288,7 @@ const OjusCommonPage = () => {
         </Marquee>
       </section>
     </div>
+    </AuthProvider>
   );
 };
 
