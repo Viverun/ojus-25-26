@@ -22,7 +22,7 @@ export default function LoginPage() {
       const profileRes = await api.get("auth/me/");
       localStorage.setItem("user", JSON.stringify(profileRes.data));
 
-      router.push("/dashboard");
+      router.push("/auth/dashboard");
     } catch (err) {
       console.error(err);
       setError("Invalid Moodle ID or Password.");
