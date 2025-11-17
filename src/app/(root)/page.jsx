@@ -39,7 +39,7 @@ function NavbarAuth() {
   }
 
   return (
-    <Link href="/auth/" className="cursor-none font-bold text-lg sm:text-xl">
+    <Link href="/auth/login/" className="cursor-none font-bold text-lg sm:text-xl">
       LOGIN
     </Link>
   );

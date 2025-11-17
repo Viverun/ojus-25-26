@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import React,{ useState, useEffect } from 'react';
 import api from "@/api/api";
+import { useAuth } from "@/context/AuthContext";
 // Complete event data matching IDs from both indoor and outdoor
 const allEvents = {
   // Indoor Events (IDs 1-8)
@@ -222,13 +223,7 @@ const EventDetailsPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Check login status on mount
-  useEffect(() => {
-    const token = localStorage.getItem("access");
-    if (token) setIsLoggedIn(true);
-  }, []);
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   if (!event) {
     return (

@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const OutdoorPage = () => {
   const [selectedDay, setSelectedDay] = useState(1);
+  const { user, isAuthenticated, loading } = useAuth();
 
   // Simplified outdoor events data with only used fields
   const eventsData = {

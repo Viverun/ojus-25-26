@@ -1,11 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import api from "@/api/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RegistrationDetailPage() {
 	const params = useParams();
+	const router = useRouter();
 	const id = params?.id;
+	const { user, isAuthenticated, loading: authLoading } = useAuth();
 	const [registration, setRegistration] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -37,13 +40,25 @@ export default function RegistrationDetailPage() {
 		return <div style={{ padding: "1rem" }}>No registration id provided.</div>;
 	}
 
+	// Check if user is authenticated and owns this registration
+	if (!authLoading && (!isAuthenticated || !user)) {
+		return <div style={{ padding: "1rem", color: "#f33" }}>You must be logged in to view registrations.</div>;
+	}
+
+	if (loading || authLoading) {
+		return <div style={{ padding: "1rem" }}>Loading...</div>;
+	}
+
+	// Check if current user owns this registration
+	if (registration && user && registration.student?.moodleID !== user.moodleID) {
+		return <div style={{ padding: "1rem", color: "#f33" }}>You can only view your own registration.</div>;
+	}
+
 	return (
 		<div style={{ padding: "1rem" }}>
 			<h2>Registration detail: {id}</h2>
 
-			{loading ? (
-				<div>Loading...</div>
-			) : error ? (
+			{error ? (
 				<div style={{ color: "#f33" }}>Error loading registration.</div>
 			) : !registration ? (
 				<div>No registration found for id {id}.</div>
