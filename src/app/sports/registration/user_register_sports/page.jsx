@@ -1,11 +1,22 @@
 "use client";
-import { useState } from "react";
-import api from "@/api/api"; 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import api from "@/api/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminRegistrationSearch() {
   const [moodleID, setMoodleID] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const router = useRouter();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    // Check if user has is_managing permission
+    if (!authLoading && (!isAuthenticated || !user)) {
+      router.push("/auth/login");
+    }
+  }, [authLoading, isAuthenticated, user, router]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -18,6 +29,18 @@ export default function AdminRegistrationSearch() {
       setError("No user found or you do not have admin access.");
     }
   };
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!isAuthenticated || !user) {
+    return <div className="min-h-screen bg-black text-white flex items-center justify-center text-red-500">You must be logged in to access this page.</div>;
+  }
+
+  if (!user.is_manageing) {
+    return <div className="min-h-screen bg-black text-white flex items-center justify-center text-red-500">You don't have permission to access this page. Only managers can view user registrations.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">

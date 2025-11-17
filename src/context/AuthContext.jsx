@@ -24,6 +24,7 @@ export function AuthProvider({ children }){
         if(mounted){
           if(res.status === 200){
             setUser(res.data)
+            console.log(res.data)
             setIsAuthenticated(true)
           }else{
             setUser(null)

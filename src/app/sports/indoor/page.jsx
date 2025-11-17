@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const IndoorPage = () => {
   const [selectedDay, setSelectedDay] = useState(1);
+  const { user, isAuthenticated, loading } = useAuth();
 
   // Simplified events data with only used fields
   const eventsData = {
