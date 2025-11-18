@@ -225,6 +225,14 @@ const EventDetailsPage = () => {
   const [message, setMessage] = useState("");
   const { user, isAuthenticated, loading: authLoading } = useAuth();
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center pt-20">
+        <div className="text-purple-400 text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   if (!event) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center pt-20">
@@ -268,8 +276,7 @@ const EventDetailsPage = () => {
     setMessage("");
 
     try {
-      const token = localStorage.getItem("access");
-      if (!token) {
+      if (!isAuthenticated) {
         setMessage("⚠️ Please log in to register for this event.");
         setLoading(false);
         return;
@@ -277,8 +284,7 @@ const EventDetailsPage = () => {
 
       const response = await api.post(
         "api/registrations/",
-        { sport_slug: event.slug },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { sport_slug: event.slug }
       );
 
       if (response.status === 201) {
@@ -366,14 +372,14 @@ const EventDetailsPage = () => {
               {/* Register Button */}
               <button
                 onClick={handleRegister}
-                disabled={loading}
+                disabled={loading || !isAuthenticated}
                 className={`w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
-                  !isLoggedIn ? "opacity-50 cursor-not-allowed" : ""
+                  !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
                 {loading
                   ? "Registering..."
-                  : isLoggedIn
+                  : isAuthenticated
                   ? "Register for Event"
                   : "Log in to Register"}
               </button>
