@@ -223,7 +223,30 @@ const EventDetailsPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [liveParticipantCount, setLiveParticipantCount] = useState(event ? event.participants : 0);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+
+ useEffect(() => {
+    const fetchLiveStats = async () => {
+      if (!event) return;
+      try {
+        const response = await api.get("api/sports/");
+        const matchingSport = response.data.find(
+          (sport) => sport.name.trim() === event.name.trim()
+        );
+        if (matchingSport) {
+          console.log("Found matching sport:", matchingSport.name, "Count:", matchingSport.participants_count);
+          setLiveParticipantCount(matchingSport.participants_count);
+        } else {
+          console.warn("Could not find a sport in DB with name:", event.name);
+        }
+      } catch (error) {
+        console.error("Could not fetch live stats:", error);
+      }
+    };
+    fetchLiveStats();
+  }, [eventId, event]);
+
 
   if (authLoading) {
     return (
@@ -289,6 +312,7 @@ const EventDetailsPage = () => {
 
       if (response.status === 201) {
         setMessage("✅ Successfully registered for the event!");
+        setLiveParticipantCount(prev => prev + 1);
       }
     } catch (error) {
       if (error.response?.status === 400) {
@@ -354,7 +378,7 @@ const EventDetailsPage = () => {
                 </div>
                 <div className="bg-gray-700/50 rounded-xl p-4 text-center">
                   <div className="text-gray-400 text-sm mb-1">Participants</div>
-                  <div className="text-white font-semibold">{event.participants}</div>
+                  <div className="text-white font-semibold">  {liveParticipantCount}</div>
                 </div>
                 <div className="bg-gray-700/50 rounded-xl p-4 text-center">
                   <div className="text-gray-400 text-sm mb-1">Prize</div>

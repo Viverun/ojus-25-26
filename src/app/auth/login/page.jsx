@@ -1,23 +1,29 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import api from "@/api/api";
 
 export default function LoginPage() {
   const [moodleID, setMoodleID] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); //
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const res = await api.post("auth/login/", { moodleID, password });
 
-      localStorage.setItem("access", res.data.access);
+      const accessToken = res.data.access;
+      localStorage.setItem("access", accessToken);
       localStorage.setItem("refresh", res.data.refresh);
+
+      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
       const profileRes = await api.get("auth/me/");
       localStorage.setItem("user", JSON.stringify(profileRes.data));
@@ -25,7 +31,13 @@ export default function LoginPage() {
       router.push("/auth/dashboard");
     } catch (err) {
       console.error(err);
-      setError("Invalid Moodle ID or Password.");
+
+      if (err.response && err.response.data) {
+        setError(err.response.data.detail || "Invalid credentials.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+      setLoading(false);
     }
   };
 
@@ -41,6 +53,7 @@ export default function LoginPage() {
             onChange={(e) => setMoodleID(e.target.value)}
             className="p-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 outline-none"
             required
+            disabled={loading} // Disable input while loading
           />
           <input
             type="password"
@@ -49,21 +62,28 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="p-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 outline-none"
             required
+            disabled={loading}
           />
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           <button
             type="submit"
-            className="bg-purple-700 hover:bg-purple-800 text-white font-semibold py-2 rounded-lg transition-all"
+            disabled={loading} // Disable button while loading
+            className={`font-semibold py-2 rounded-lg transition-all ${
+              loading 
+                ? "bg-purple-900 text-gray-400 cursor-not-allowed" 
+                : "bg-purple-700 hover:bg-purple-800 text-white"
+            }`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-400 mt-4">
           Don’t have an account?{" "}
-          <a href="/signup" className="text-purple-400 hover:text-purple-300 underline">
+          <Link href="/signup" className="text-purple-400 hover:text-purple-300 underline">
             Sign Up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
