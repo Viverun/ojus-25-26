@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Medal, Crown, Loader2, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Trophy, Medal, Crown, Loader2, AlertCircle, ChevronRight } from "lucide-react";
 
 // --- CONFIGURATION ---
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -23,9 +24,36 @@ const getRankIcon = (index) => {
 };
 
 export default function DepartmentLeaderboardPage() {
+  const router = useRouter();
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sports, setSports] = useState([]);
+  const [sportsLoading, setSportsLoading] = useState(true);
+  const [selectedSport, setSelectedSport] = useState('');
+
+  // Fetch sports list
+  useEffect(() => {
+    const fetchSports = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/sports/`);
+        if (!res.ok) throw new Error('Failed to fetch sports');
+        const data = await res.json();
+        setSports(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setSportsLoading(false);
+      }
+    };
+    fetchSports();
+  }, []);
+
+  const handleSportSelect = (sport) => {
+    if (sport.slug) {
+      router.push(`/sports/leaderboard/${sport.slug}`);
+    }
+  };
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -59,6 +87,32 @@ export default function DepartmentLeaderboardPage() {
             <p className="text-gray-400 text-lg uppercase tracking-widest">Department Standings 2025-26</p>
         </div>
 
+        {/* Sports Selector Section */}
+        <div className="mb-12 border border-purple-500/30 rounded-lg p-8 bg-purple-500/5 backdrop-blur-sm">
+          <h2 className="text-2xl font-bold text-purple-400 mb-6">View Sport-Specific Leaderboard</h2>
+          {sportsLoading ? (
+            <div className="flex justify-center items-center h-12">
+              <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+            </div>
+          ) : sports.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {sports.map((sport) => (
+                <button
+                  key={sport.id}
+                  onClick={() => handleSportSelect(sport)}
+                  className="flex items-center justify-between p-4 bg-gray-900 border border-purple-500/30 hover:border-purple-500/60 rounded-lg hover:bg-gray-800 transition-all duration-300 group"
+                >
+                  <span className="font-semibold text-gray-300 group-hover:text-purple-400 transition-colors">{sport.name}</span>
+                  <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No sports available.</p>
+          )}
+        </div>
+
+        {/* Department Standings */}
         {loading ? (
              <div className="flex justify-center items-center h-64">
                 <Loader2 className="w-10 h-10 animate-spin text-blue-500" />

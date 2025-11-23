@@ -58,6 +58,13 @@ export default function AdminPage(){
         { label: "Dashboard", url: "/auth/dashboard", icon: "📊", desc: "View your profile and stats" },
         { label: "Browse Sports", url: "/sports", icon: "🎯", desc: "Browse all available sports" },
       ]
+    },
+    {
+      category: "Leaderboard",
+      controls: [
+        { label: "Overall Leaderboard", url: "sports/leaderboard", icon: "🏆", desc: "View overall departmental standings" },
+        { label: "Sport Leaderboard", url: "/sports/leaderboard/chess-masters", icon: "🥇🥈🥉", desc: "View individual sport standings" },
+      ]
     }
   ]
 

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation'; // <-- FIXED: Uses proper Next.js hook
-import { ArrowUp, ArrowDown, Save, Loader2, GripVertical, Trophy, Medal, Shield, Plus, Minus, CheckCircle, Lock } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation'; // <-- FIXED: Uses proper Next.js hook
+import { ArrowUp, ArrowDown, Save, Loader2, GripVertical, Trophy, Medal, Shield, Plus, Minus, CheckCircle, Lock, ChevronRight } from 'lucide-react';
 import { DndContext, closestCenter, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -114,6 +114,7 @@ function ReadOnlyItem({ item, index }) {
 export default function SportLeaderboardPage() {
   // 1. FIX: Use useParams hook instead of props to handle Next.js 15 async params correctly
   const params = useParams(); 
+  const router = useRouter();
   const sportSlug = params?.slug;
   
   const isAdmin = useIsAdmin();
@@ -121,8 +122,33 @@ export default function SportLeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [sports, setSports] = useState([]);
+  const [sportsLoading, setSportsLoading] = useState(true);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  // Fetch sports list for switcher
+  useEffect(() => {
+    const fetchSports = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/sports/`);
+        if (!res.ok) throw new Error('Failed to fetch sports');
+        const data = await res.json();
+        setSports(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setSportsLoading(false);
+      }
+    };
+    fetchSports();
+  }, []);
+
+  const handleSportSwitch = (sport) => {
+    if (sport.slug) {
+      router.push(`/sports/leaderboard/${sport.slug}`);
+    }
+  };
 
   // Fetch logic
   useEffect(() => {
@@ -235,6 +261,34 @@ export default function SportLeaderboardPage() {
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       <div className="max-w-4xl mx-auto">
+        {/* Sport Switcher */}
+        <div className="mb-8 border border-purple-500/30 rounded-lg p-6 bg-purple-500/5 backdrop-blur-sm">
+          <h3 className="text-sm font-bold text-purple-400 uppercase tracking-wide mb-4">Switch Sport</h3>
+          {sportsLoading ? (
+            <div className="flex justify-center items-center h-10">
+              <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+            </div>
+          ) : sports.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {sports.map((sport) => (
+                <button
+                  key={sport.id}
+                  onClick={() => handleSportSwitch(sport)}
+                  className={`p-2 rounded-lg text-sm font-semibold transition-all ${
+                    sport.slug === sportSlug
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-purple-400'
+                  }`}
+                >
+                  {sport.name}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No sports available.</p>
+          )}
+        </div>
+
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-gray-800 gap-4">
             <div>
                 <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 capitalize mb-2">{sportName}</h1>
