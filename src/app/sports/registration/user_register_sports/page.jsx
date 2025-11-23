@@ -38,7 +38,7 @@ export default function AdminRegistrationSearch() {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center text-red-500">You must be logged in to access this page.</div>;
   }
 
-  if (!user.is_manageing) {
+  if (!user.is_managing) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center text-red-500">You don't have permission to access this page. Only managers can view user registrations.</div>;
   }
 

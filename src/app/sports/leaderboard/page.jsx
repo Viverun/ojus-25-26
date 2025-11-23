@@ -3,9 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Trophy, Medal, Crown, Loader2, AlertCircle, ChevronRight } from "lucide-react";
-
-// --- CONFIGURATION ---
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import api from "@/api/api";
 
 const BRANCH_NAMES = {
     'COMPS': 'Computer Engineering',
@@ -36,10 +34,8 @@ export default function DepartmentLeaderboardPage() {
   useEffect(() => {
     const fetchSports = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/sports/`);
-        if (!res.ok) throw new Error('Failed to fetch sports');
-        const data = await res.json();
-        setSports(data);
+        const res = await api.get('api/sports/');
+        setSports(res.data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -59,10 +55,8 @@ export default function DepartmentLeaderboardPage() {
     const fetchLeaderboard = async () => {
         try {
             // CRITICAL: Fetches points ONLY from FINALIZED sports on the backend
-            const res = await fetch(`${API_BASE_URL}/api/leaderboard/department/`);
-            if (!res.ok) throw new Error('Failed to fetch leaderboard data');
-            const data = await res.json();
-            setStandings(data);
+            const res = await api.get('api/leaderboard/department/');
+            setStandings(res.data);
         } catch (err) {
             console.error(err);
             setError("Unable to load department standings.");

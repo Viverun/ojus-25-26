@@ -15,7 +15,7 @@ export default function AdminPage(){
     )
   }
 
-  if (!isAuthenticated || !user?.is_manageing) {
+  if (!isAuthenticated || !user?.is_managing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex items-center justify-center px-6">
         <div className="text-center">

@@ -1,12 +1,13 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation'; // <-- FIXED: Uses proper Next.js hook
+import { useParams, useRouter } from 'next/navigation'; 
+import Link from 'next/link'; // <-- FIXED: Imported Link for proper navigation
 import { ArrowUp, ArrowDown, Save, Loader2, GripVertical, Trophy, Medal, Shield, Plus, Minus, CheckCircle, Lock, ChevronRight } from 'lucide-react';
 import { DndContext, closestCenter, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import api from '@/api/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // --- AUTH CHECK ---
 const useIsAdmin = () => {
@@ -112,9 +113,7 @@ function ReadOnlyItem({ item, index }) {
 
 // --- Main Page ---
 export default function SportLeaderboardPage() {
-  // 1. FIX: Use useParams hook instead of props to handle Next.js 15 async params correctly
   const params = useParams(); 
-  const router = useRouter();
   const sportSlug = params?.slug;
   
   const isAdmin = useIsAdmin();
@@ -131,10 +130,9 @@ export default function SportLeaderboardPage() {
   useEffect(() => {
     const fetchSports = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/sports/`);
-        if (!res.ok) throw new Error('Failed to fetch sports');
-        const data = await res.json();
-        setSports(data);
+        const res = await api.get('api/sports/');
+        console.log(res.data)
+        setSports(res.data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -144,24 +142,14 @@ export default function SportLeaderboardPage() {
     fetchSports();
   }, []);
 
-  const handleSportSwitch = (sport) => {
-    if (sport.slug) {
-      router.push(`/sports/leaderboard/${sport.slug}`);
-    }
-  };
-
   // Fetch logic
   useEffect(() => {
     if (!sportSlug) return;
 
     setLoading(true);
-    fetch(`${API_BASE_URL}/api/leaderboard/sport/${sportSlug}/`)
+    api.get(`api/leaderboard/sport/${sportSlug}/`)
       .then(res => {
-          if(!res.ok) throw new Error("Failed to fetch standings");
-          return res.json();
-      })
-      .then(data => {
-          setStandings(data);
+          setStandings(res.data);
           setLoading(false);
       })
       .catch(err => {
@@ -191,42 +179,25 @@ export default function SportLeaderboardPage() {
   };
 
   const handleAdjustPoints = async (id, action) => {
-      const token = localStorage.getItem('access');
-      if (!token) return setMsg({type: 'error', text: "Login required."});
-
       setStandings(prev => prev.map(item => item.id === id ? { 
           ...item, 
           score: action === 'add' ? (item.score || 0) + 1 : Math.max(0, (item.score || 0) - 1) 
       } : item));
 
       try {
-          await fetch(`${API_BASE_URL}/api/leaderboard/result/${id}/adjust/`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-              body: JSON.stringify({ action })
-          });
+          await api.post(`api/leaderboard/result/${id}/adjust/`, { action });
       } catch (e) { 
           setMsg({type: 'error', text: "Failed to sync score."});
       }
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem('access');
-    if (!token) return setMsg({type: 'error', text: "Login required."});
-    
     setSaving(true);
     const payload = standings.map((item, index) => ({ id: item.id, position: index + 1 }));
 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/leaderboard/sport/${sportSlug}/update/`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Save failed");
-        
-        const updatedData = await res.json();
-        setStandings(updatedData); 
+        const res = await api.put(`api/leaderboard/sport/${sportSlug}/update/`, payload);
+        setStandings(res.data); 
         setMsg({type: 'success', text: "Draft standings updated."});
         setTimeout(() => setMsg(null), 3000);
     } catch (err) { setMsg({type: 'error', text: "Failed to save ranking."}); }
@@ -234,22 +205,15 @@ export default function SportLeaderboardPage() {
   };
 
   const handleFinalize = async () => {
-      const token = localStorage.getItem('access');
-      if (!token) return;
       if(!confirm("Finalize rankings? Points will be distributed to departments.")) return;
 
       try {
-          const res = await fetch(`${API_BASE_URL}/api/leaderboard/sport/${sportSlug}/finalize/`, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (!res.ok) throw new Error("Failed");
+          await api.post(`api/leaderboard/sport/${sportSlug}/finalize/`);
           
           setMsg({type: 'success', text: "🏆 Points Distributed!"});
           // Refetch to update the finalized state locally
-          const refreshRes = await fetch(`${API_BASE_URL}/api/leaderboard/sport/${sportSlug}/`);
-          const refreshData = await refreshRes.json();
-          setStandings(refreshData);
+          const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
+          setStandings(refreshRes.data);
       } catch (e) { setMsg({type: 'error', text: "Error finalizing."}); }
   };
 
@@ -270,18 +234,19 @@ export default function SportLeaderboardPage() {
             </div>
           ) : sports.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {/* FIXED: Changed Button + onClick to Next.js Link for reliable navigation */}
               {sports.map((sport) => (
-                <button
+                <Link
                   key={sport.id}
-                  onClick={() => handleSportSwitch(sport)}
-                  className={`p-2 rounded-lg text-sm font-semibold transition-all ${
+                  href={sport.slug ? `/sports/leaderboard/${sport.slug}` : '#'}
+                  className={`p-2 rounded-lg text-sm font-semibold transition-all block text-center ${
                     sport.slug === sportSlug
                       ? 'bg-purple-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-purple-400'
                   }`}
                 >
                   {sport.name}
-                </button>
+                </Link>
               ))}
             </div>
           ) : (

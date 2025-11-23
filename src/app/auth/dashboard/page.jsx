@@ -38,6 +38,8 @@ export default function Dashboard() {
     router.push("/");
   };
 
+  const isManager = user?.is_managing || user?.is_managing;
+
   if (loading || !user)
     return (
       <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-gray-900 via-black to-gray-900 text-purple-400">
@@ -75,7 +77,7 @@ export default function Dashboard() {
                   <InfoItem label="Year" value={user.year || "N/A"} />
                   <InfoItem label="Phone" value={user.phone_number || "Not provided"} />
                   <InfoItem label="Status" value={user.is_active ? "Active" : "Inactive"} status={user.is_active} />
-                  {user.is_manageing && <InfoItem label="Role" value="Manager" status={true} badge />}
+                  {user.is_managing && <InfoItem label="Role" value="Manager" status={true} badge />}
                 </div>
 
                 <button
@@ -137,10 +139,14 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           <QuickActionCard title="Browse Sports" subtitle="Explore all available sports" href="/sports" icon="⚽" />
           <QuickActionCard title="My Teams" subtitle="View and manage your teams" href="/sports/teams/list/all" icon="👥" />
           <QuickActionCard title="Events" subtitle="Check upcoming events" href="/sports" icon="📅" />
+          <QuickActionCard title="Leaderboard" subtitle="See department standings" href="/sports/leaderboard" icon="🏆" />
+          {isManager && (
+            <QuickActionCard title="Admin Panel" subtitle="Manager controls" href="/admin" icon="🛠️" />
+          )}
         </div>
       </div>
     </main>

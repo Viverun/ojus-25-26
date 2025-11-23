@@ -53,7 +53,7 @@ export default function RegistrationsAllTest() {
     );
   }
 
-  if (!user?.is_manageing) {
+  if (!user?.is_managing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex items-center justify-center">
         <div className="text-center text-red-400 text-lg">You don't have permission to view all registrations. Only managers can access this page.</div>
