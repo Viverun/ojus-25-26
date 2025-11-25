@@ -2,7 +2,16 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Trophy, Medal, Crown, Loader2, AlertCircle, ChevronRight } from "lucide-react";
+import Link from "next/link"; // ✅ Added Link
+import {
+  Trophy,
+  Medal,
+  Crown,
+  Loader2,
+  AlertCircle,
+  ChevronRight,
+  ArrowLeft // ✅ Added ArrowLeft
+} from "lucide-react";
 import api from "@/api/api";
 
 const BRANCH_NAMES = {
@@ -28,7 +37,6 @@ export default function DepartmentLeaderboardPage() {
   const [error, setError] = useState(null);
   const [sports, setSports] = useState([]);
   const [sportsLoading, setSportsLoading] = useState(true);
-  const [selectedSport, setSelectedSport] = useState('');
 
   // Fetch sports list
   useEffect(() => {
@@ -70,6 +78,18 @@ export default function DepartmentLeaderboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white p-6 md:p-12 font-sans">
       <div className="max-w-5xl mx-auto">
+
+        {/* ✅ Added: Go to Dashboard Button */}
+        <div className="mb-8">
+          <Link
+            href="/auth/dashboard"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Go to Dashboard</span>
+          </Link>
+        </div>
+
         <div className="text-center mb-16 space-y-4">
             <motion.h1
                 initial={{ opacity: 0, y: -20 }}

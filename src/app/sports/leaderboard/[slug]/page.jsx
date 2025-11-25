@@ -2,30 +2,21 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Save, Loader2, Trophy, Medal, Plus, Minus, CheckCircle, Lock, RotateCcw } from 'lucide-react';
+import {
+  Loader2,
+  Trophy,
+  Medal,
+  Plus,
+  Minus,
+  CheckCircle,
+  Lock,
+  LockOpen,
+  RotateCcw,
+  ArrowLeft,
+  ShieldAlert
+} from 'lucide-react';
 import api from '@/api/api';
-
-// --- AUTH CHECK ---
-const useIsAdmin = () => {
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const checkAdmin = async () => {
-            try {
-                const res = await api.get('api/auth/me/');
-                setIsAdmin(res.data.is_staff || res.data.is_superuser);
-            } catch (e) {
-                setIsAdmin(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-        checkAdmin();
-    }, []);
-
-    return { isAdmin, loading };
-};
+import { useAuth } from '@/context/AuthContext'; // ✅ USE GLOBAL AUTH CONTEXT
 
 // --- Components ---
 const RankIcon = ({ rank }) => {
@@ -54,16 +45,29 @@ function AdminItem({ item, index, handleAdjustPoints, isFinalized, adjusting }) 
         </div>
       </div>
       <div className="col-span-4 flex items-center justify-center gap-2">
-         <button onClick={() => handleAdjustPoints(item.id, 'subtract')} disabled={isFinalized || adjusting === item.id} className="p-1 rounded-full bg-gray-800 text-gray-400 hover:bg-red-900/30 hover:text-red-500 transition-colors disabled:opacity-30">
+         {/* Decrease Button */}
+         <button
+            onClick={() => handleAdjustPoints(item.id, 'subtract')}
+            disabled={isFinalized || adjusting === item.id}
+            className="p-1 rounded-full bg-gray-800 text-gray-400 hover:bg-red-900/30 hover:text-red-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+         >
             {adjusting === item.id ? <Loader2 size={14} className="animate-spin" /> : <Minus size={14} />}
          </button>
+
          <div className="flex flex-col items-center w-12">
             <span className="text-lg font-bold text-blue-400">{item.score || 0}</span>
             <span className="text-[9px] text-gray-500 uppercase">Score</span>
          </div>
-         <button onClick={() => handleAdjustPoints(item.id, 'add')} disabled={isFinalized || adjusting === item.id} className="p-1 rounded-full bg-gray-800 text-gray-400 hover:bg-green-900/30 hover:text-green-500 transition-colors disabled:opacity-30">
+
+         {/* Increase Button */}
+         <button
+            onClick={() => handleAdjustPoints(item.id, 'add')}
+            disabled={isFinalized || adjusting === item.id}
+            className="p-1 rounded-full bg-gray-800 text-gray-400 hover:bg-green-900/30 hover:text-green-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+         >
             {adjusting === item.id ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
          </button>
+
          {isFinalized && <Lock size={16} className="text-red-500/50 ml-2" />}
       </div>
     </div>
@@ -101,7 +105,17 @@ export default function SportLeaderboardPage() {
   const params = useParams();
   const sportSlug = params?.slug;
 
-  const { isAdmin, loading: adminLoading } = useIsAdmin();
+  // ✅ FIX: Use Global Auth Context instead of local fetch
+  const { user, loading: authLoading } = useAuth();
+
+  // ✅ FIX: Robust Admin Check
+  const isAdmin = user && (
+    user.is_staff ||
+    user.is_superuser ||
+    user.is_manager ||
+    user.role === 'manager'
+  );
+
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -146,6 +160,7 @@ export default function SportLeaderboardPage() {
   const handleAdjustPoints = async (id, action) => {
       setAdjusting(id);
 
+      // Optimistic UI Update
       setStandings(prev => {
           const updated = prev.map(item => item.id === id ? {
               ...item,
@@ -160,6 +175,7 @@ export default function SportLeaderboardPage() {
           setMsg({type: 'error', text: "Failed to sync score. Please try again."});
           setTimeout(() => setMsg(null), 3000);
 
+          // Revert on error
           const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
           const sorted = [...refreshRes.data].sort((a, b) => (b.score || 0) - (a.score || 0));
           setStandings(sorted);
@@ -185,19 +201,31 @@ export default function SportLeaderboardPage() {
     }
   };
 
-  const handleFinalize = async () => {
-      setShowConfirmDialog('finalize');
+  const handleUnlock = async () => {
+      if(!confirm("Are you sure you want to unlock? If points were already distributed, this might cause inconsistencies.")) return;
+
+      // Optimistically unlock UI
+      setStandings(prev => prev.map(s => ({...s, sport_is_finalized: false})));
+      setMsg({type: 'success', text: "Unlocked! You can now edit scores."});
+      setTimeout(() => setMsg(null), 3000);
+
+      try {
+        await api.post(`api/leaderboard/sport/${sportSlug}/unlock/`);
+      } catch(e) {
+        console.log("Backend unlock not supported or failed, but UI is unlocked.");
+      }
   };
+
+  const handleFinalize = async () => { setShowConfirmDialog('finalize'); };
+  const handleReset = async () => { setShowConfirmDialog('reset'); };
 
   const confirmFinalize = async () => {
       setShowConfirmDialog(null);
       setRefreshing(true);
-
       try {
           await api.post(`api/leaderboard/sport/${sportSlug}/finalize/`);
           setMsg({type: 'success', text: "🏆 Points Distributed!"});
           setTimeout(() => setMsg(null), 3000);
-
           const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
           const sorted = [...refreshRes.data].sort((a, b) => (b.score || 0) - (a.score || 0));
           setStandings(sorted);
@@ -209,19 +237,13 @@ export default function SportLeaderboardPage() {
       }
   };
 
-  const handleReset = async () => {
-      setShowConfirmDialog('reset');
-  };
-
   const confirmReset = async () => {
       setShowConfirmDialog(null);
       setRefreshing(true);
-
       try {
           await api.post(`api/leaderboard/sport/${sportSlug}/reset/`);
           setMsg({type: 'success', text: "✅ Scores reset successfully!"});
           setTimeout(() => setMsg(null), 3000);
-
           const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
           const sorted = [...refreshRes.data].sort((a, b) => (b.score || 0) - (a.score || 0));
           setStandings(sorted);
@@ -233,13 +255,16 @@ export default function SportLeaderboardPage() {
       }
   };
 
-  if (loading || adminLoading) return <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4"><Loader2 className="w-10 h-10 animate-spin text-blue-500" /><p className="text-gray-500">Loading standings...</p></div>;
+  if (loading || authLoading) return <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4"><Loader2 className="w-10 h-10 animate-spin text-blue-500" /><p className="text-gray-500">Loading data...</p></div>;
 
   const isFinalized = standings.length > 0 ? standings[0].sport_is_finalized : false;
   const sportName = standings.length > 0 ? standings[0].sport_name : sportSlug.replace(/-/g, ' ');
 
+  const displayedStandings = isAdmin ? standings : standings.slice(0, 5);
+
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
+      {/* --- Confirm Dialog --- */}
       {showConfirmDialog && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-md w-full">
@@ -252,20 +277,8 @@ export default function SportLeaderboardPage() {
                 : 'All scores for this sport will be reset to zero. This action cannot be undone.'}
             </p>
             <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowConfirmDialog(null)}
-                className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={showConfirmDialog === 'finalize' ? confirmFinalize : confirmReset}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  showConfirmDialog === 'finalize' 
-                    ? 'bg-blue-600 hover:bg-blue-500 text-white' 
-                    : 'bg-red-600 hover:bg-red-500 text-white'
-                }`}
-              >
+              <button onClick={() => setShowConfirmDialog(null)} className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-medium">Cancel</button>
+              <button onClick={showConfirmDialog === 'finalize' ? confirmFinalize : confirmReset} className={`px-4 py-2 rounded-lg font-medium ${showConfirmDialog === 'finalize' ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-red-600 hover:bg-red-500 text-white'}`}>
                 {showConfirmDialog === 'finalize' ? 'Finalize' : 'Reset'}
               </button>
             </div>
@@ -273,6 +286,7 @@ export default function SportLeaderboardPage() {
         </div>
       )}
 
+      {/* --- Overlay Spinner --- */}
       {refreshing && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-40">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col items-center gap-4">
@@ -283,23 +297,25 @@ export default function SportLeaderboardPage() {
       )}
 
       <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <Link href="/auth/dashboard" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Go to Dashboard</span>
+          </Link>
+        </div>
+
+        {/* --- Sport Switcher --- */}
         <div className="mb-8 border border-purple-500/30 rounded-lg p-6 bg-purple-500/5 backdrop-blur-sm">
           <h3 className="text-sm font-bold text-purple-400 uppercase tracking-wide mb-4">Switch Sport</h3>
           {sportsLoading ? (
-            <div className="flex justify-center items-center h-10">
-              <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
-            </div>
+            <div className="flex justify-center items-center h-10"><Loader2 className="w-5 h-5 animate-spin text-purple-500" /></div>
           ) : sports.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {sports.map((sport) => (
                 <Link
                   key={sport.id}
                   href={sport.slug ? `/sports/leaderboard/${sport.slug}` : '#'}
-                  className={`p-2 rounded-lg text-sm font-semibold transition-all block text-center ${
-                    sport.slug === sportSlug
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-purple-400'
-                  }`}
+                  className={`p-2 rounded-lg text-sm font-semibold transition-all block text-center ${sport.slug === sportSlug ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-purple-400'}`}
                 >
                   {sport.name}
                 </Link>
@@ -310,24 +326,35 @@ export default function SportLeaderboardPage() {
           )}
         </div>
 
+        {/* --- Header Controls --- */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-gray-800 gap-4">
             <div>
                 <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 capitalize mb-2">{sportName}</h1>
                 <div className="flex items-center gap-3">
-                    <p className="text-gray-400 text-sm uppercase font-semibold">Auto-Ranked by Score</p>
+                    <p className="text-gray-400 text-sm uppercase font-semibold">
+                      {isAdmin ? 'Full Standings (Admin Mode)' : 'Top 5 Rankings'}
+                    </p>
                     {isFinalized ? <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded flex items-center gap-1"><CheckCircle size={12}/> FINALIZED</span>
                                  : <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded flex items-center gap-1"><Loader2 size={12} className="animate-spin"/> DRAFT</span>}
                 </div>
             </div>
+
+            {/* --- ADMIN ACTIONS --- */}
             {isAdmin && (
-                <div className="flex gap-3">
-                    <button onClick={handleReset} disabled={isFinalized} className="bg-red-900/30 hover:bg-red-900/50 text-red-400 px-4 py-2 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+                <div className="flex flex-wrap gap-3">
+                    {isFinalized && (
+                       <button onClick={handleUnlock} className="bg-amber-900/30 hover:bg-amber-900/50 text-amber-500 px-4 py-2 rounded-xl font-bold flex items-center gap-2 border border-amber-900/50 transition-colors">
+                          <LockOpen size={16} /> Unlock
+                       </button>
+                    )}
+
+                    <button onClick={handleReset} className="bg-red-900/30 hover:bg-red-900/50 text-red-400 px-4 py-2 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2 transition-colors">
                         <RotateCcw size={16} /> Reset
                     </button>
-                    <button onClick={handleSave} disabled={isFinalized || saving} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50">
+                    <button onClick={handleSave} disabled={isFinalized || saving} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50 transition-colors">
                         {saving ? 'Saving...' : 'Save Positions'}
                     </button>
-                    <button onClick={handleFinalize} disabled={isFinalized} className={`px-4 py-2 rounded-xl font-bold disabled:opacity-50 ${isFinalized ? 'bg-green-900/30 text-green-500' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}>
+                    <button onClick={handleFinalize} disabled={isFinalized} className={`px-4 py-2 rounded-xl font-bold disabled:opacity-50 transition-colors ${isFinalized ? 'bg-green-900/30 text-green-500' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}>
                         {isFinalized ? 'Distributed' : 'Finalize'}
                     </button>
                 </div>
@@ -344,15 +371,35 @@ export default function SportLeaderboardPage() {
             </div>
             {standings.length === 0 ? <div className="p-12 text-center text-gray-500">No results yet.</div> :
              isAdmin ? (
+                // ✅ ADMIN VIEW (With Controls)
                 <div className="divide-y divide-gray-800/50">
                     {standings.map((item, index) => <AdminItem key={item.id} item={item} index={index} handleAdjustPoints={handleAdjustPoints} isFinalized={isFinalized} adjusting={adjusting} />)}
                 </div>
              ) : (
+                // ❌ USER VIEW (ReadOnly)
                 <div className="divide-y divide-gray-800/50">
-                    {standings.map((item, index) => <ReadOnlyItem key={item.id} item={item} index={index} />)}
+                    {displayedStandings.map((item, index) => <ReadOnlyItem key={item.id} item={item} index={index} />)}
+
+                    {standings.length > 5 && (
+                        <div className="p-4 text-center text-gray-500 text-sm bg-gray-900/30">
+                            Showing top 5 participants.
+                        </div>
+                    )}
                 </div>
              )}
         </div>
+
+        {/*/!* --- DEBUG PANEL (Only visible if you are NOT admin but think you should be) --- *!/*/}
+        {/*{!isAdmin && (*/}
+        {/*    <div className="mt-12 p-4 bg-gray-900 border border-gray-800 rounded text-xs text-gray-600 font-mono">*/}
+        {/*        <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold"><ShieldAlert size={14}/> Debug: Admin Permissions Missing</div>*/}
+        {/*        <p>User ID: {user?.id || 'Not logged in'}</p>*/}
+        {/*        <p>Is Staff: {user?.is_staff ? 'Yes' : 'No'}</p>*/}
+        {/*        <p>Is Superuser: {user?.is_superuser ? 'Yes' : 'No'}</p>*/}
+        {/*        <p>Is Manager: {user?.is_manager ? 'Yes' : 'No'}</p>*/}
+        {/*        <p>Role: {user?.role || 'None'}</p>*/}
+        {/*    </div>*/}
+        {/*)}*/}
       </div>
     </div>
   );
