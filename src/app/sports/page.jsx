@@ -82,7 +82,6 @@ const SportsPage = () => {
           </motion.div>
         </section>
 
- 
         {/* --- Arena Section --- */}
         <section
           className="min-h-screen w-full flex flex-col justify-center items-center
@@ -189,46 +188,54 @@ const SportsPage = () => {
 
         {/* SECTION 3 */}
         <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-10 md:px-20 py-16 bg-zinc-200 text-black">
-                  <div className="flex flex-col md:flex-row justify-between gap-16 w-full">
-                    <motion.div
-                      initial={{ opacity: 0, x: -60 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 1 }}
-                      viewport={{ once: false, amount: 0.3 }}
-                      className="flex-1"
-                    >
-                      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-none">ABOUT</h2>
-                      <h1 className="text-7xl sm:text-8xl md:text-[120px] font-extrabold leading-none mt-2">OJUS</h1>
-        
-                      <p className="mt-8 text-sm md:text-lg leading-relaxed max-w-xl flex flex-col gap-y-2">
-                        <span>
-                          Ojus is APSIT’s annual cultural festival, transforming the campus into a vibrant hub of music, dance,
-                          art, and creativity. Each year, a unique and captivating theme sets the tone for the entire celebration,
-                          adding excitement and energy.
-                        </span>
-        
-                      <span className="hidden md:flex">
-                        From dance and music to fashion, theatre, and gaming, Ojus showcases diverse student talent and embodies
-                        APSIT’s cultural spirit, creating unforgettable memories for everyone who attends and experiences the
-                        festival’s lively atmosphere.
-                      </span>
-                    </p>
-                  </motion.div>
-        
-                    <motion.div
-                      initial={{ opacity: 0, x: 60 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 1 }}
-                      viewport={{ once: false, amount: 0.4 }}
-                      className="hidden md:flex md:flex-1 md:flex-col items-end text-right"
-                    >
-                      <p className="text-xs tracking-widest">OJUS</p>
-                      <p className="text-xs tracking-widest">25</p>
-                      <img src="https://placehold.co/600x400" alt="Videos of OJUS" className="w-24 sm:w-28 md:w-32 h-auto mt-2" />
-                      <p className="text-xs mt-1 tracking-widest">2024</p>
-                    </motion.div>
-                  </div>
-                </section>
+          <div className="flex flex-col md:flex-row justify-between gap-16 w-full">
+            <motion.div
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1 }}
+              viewport={{ once: false, amount: 0.3 }}
+              className="flex-1"
+            >
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-none">OJUS</h2>
+              <h1 className="text-7xl sm:text-8xl md:text-[120px] font-extrabold leading-none mt-2">SPORTS</h1>
+
+              <p className="mt-8 text-sm md:text-lg leading-relaxed max-w-xl flex flex-col gap-y-2">
+                <span>
+                  Ojus Sports is APSIT’s annual inter-department sports festival, bringing together athletes, teams, and
+                  enthusiastic supporters for a celebration of competition, teamwork, and college spirit.
+                </span>
+
+                <span className="hidden md:flex">
+                  Featuring events like football, cricket, volleyball, kabaddi, athletics, and indoor games, Ojus Sports
+                  highlights the strength, determination, and sportsmanship of APSIT’s students while creating an
+                  electric atmosphere across the campus.
+                </span>
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1 }}
+              viewport={{ once: false, amount: 0.4 }}
+              className="hidden md:flex md:flex-1 md:flex-col items-end text-right"
+            >
+              <p className="text-xs tracking-widest">OJUS</p>
+              <p className="text-xs tracking-widest">25</p>
+              <img
+                src="https://placehold.co/600x400"
+                alt="Videos of OJUS"
+                className="w-24 sm:w-28 md:w-32 h-auto mt-2"
+              />
+              <p className="text-xs mt-1 tracking-widest">2024</p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION 4 */}
+        <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-12 md:px-20 py-16 bg-black text-white">
+          LEADERBOARD SCORE OF PLAYERS AND DEPARTMENT WILL BE SHOWN HERE DURING THE SPORTS EVENT
+        </section>
       </main>
     </>
   );
