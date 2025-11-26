@@ -16,84 +16,93 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import api from '@/api/api';
-import { useAuth } from '@/context/AuthContext'; // ✅ USE GLOBAL AUTH CONTEXT
+import { useAuth } from '@/context/AuthContext';
+
+// Import the CSS file
+import "./page.css";
 
 // --- Components ---
 const RankIcon = ({ rank }) => {
-    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-400 fill-yellow-400" />;
-    if (rank === 2) return <Medal className="w-6 h-6 text-gray-300 fill-gray-300" />;
-    if (rank === 3) return <Medal className="w-6 h-6 text-amber-600 fill-amber-600" />;
-    return <span className="font-mono font-bold text-gray-500 text-lg">#{rank}</span>;
+    if (rank === 1) return <Trophy className="sl-icon-gold" />;
+    if (rank === 2) return <Medal className="sl-icon-silver" />;
+    if (rank === 3) return <Medal className="sl-icon-bronze" />;
+    return <span className="sl-rank-text">#{rank}</span>;
 };
 
-function AdminItem({ item, index, handleAdjustPoints, isFinalized, adjusting }) {
+function AdminItem({ item, index, handleAdjustScore, isFinalized, adjusting }) {
   const displayRank = item.position || (index + 1);
   const displayDeptPoints = item.points || 0;
 
   return (
-    <div className={`group grid grid-cols-12 items-center gap-4 p-4 border-b border-gray-800 transition-colors ${isFinalized ? 'bg-gray-900/60' : 'bg-gray-900 hover:bg-gray-800'}`}>
-      <div className="col-span-2 flex justify-center"><RankIcon rank={displayRank} /></div>
-      <div className="col-span-6">
-        <div className="font-bold text-white text-lg truncate">{item.display_name}</div>
-        <div className="flex items-center gap-2 text-xs text-gray-500 uppercase">
-            <span className="bg-gray-800 px-2 py-0.5 rounded">{item.branch}</span>
+    <div className={`sl-row ${isFinalized ? 'sl-bg-final' : 'sl-bg-dark'}`}>
+      <div className="sl-col-rank">
+        <RankIcon rank={displayRank} />
+      </div>
+      <div className="sl-col-name-admin">
+        <div className="sl-participant-name">{item.display_name}</div>
+        <div className="sl-participant-meta">
+            <span className="sl-dept-badge">{item.branch}</span>
             {displayDeptPoints > 0 && (
-                 <span className="text-yellow-600 bg-yellow-900/20 px-1.5 rounded font-mono font-bold border border-yellow-900/50">
+                 <span className="sl-dept-pts">
                     +{displayDeptPoints} Dept Pts
                 </span>
             )}
         </div>
       </div>
-      <div className="col-span-4 flex items-center justify-center gap-2">
+      <div className="sl-col-ctrl-admin">
          {/* Decrease Button */}
          <button
-            onClick={() => handleAdjustPoints(item.id, 'subtract')}
+            onClick={() => handleAdjustScore(item.id, 'subtract')}
             disabled={isFinalized || adjusting === item.id}
-            className="p-1 rounded-full bg-gray-800 text-gray-400 hover:bg-red-900/30 hover:text-red-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="sl-adjust-btn"
+            aria-label="Decrease score"
          >
-            {adjusting === item.id ? <Loader2 size={14} className="animate-spin" /> : <Minus size={14} />}
+            {adjusting === item.id ? <Loader2 size={14} className="sl-spin" /> : <Minus size={14} />}
          </button>
 
-         <div className="flex flex-col items-center w-12">
-            <span className="text-lg font-bold text-blue-400">{item.score || 0}</span>
-            <span className="text-[9px] text-gray-500 uppercase">Score</span>
+         <div className="sl-score-admin-box">
+            <span className="sl-score-admin-val">{item.score || 0}</span>
+            <span className="sl-score-admin-lbl">Score</span>
          </div>
 
          {/* Increase Button */}
          <button
-            onClick={() => handleAdjustPoints(item.id, 'add')}
+            onClick={() => handleAdjustScore(item.id, 'add')}
             disabled={isFinalized || adjusting === item.id}
-            className="p-1 rounded-full bg-gray-800 text-gray-400 hover:bg-green-900/30 hover:text-green-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="sl-adjust-btn sl-plus"
+            aria-label="Increase score"
          >
-            {adjusting === item.id ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+            {adjusting === item.id ? <Loader2 size={14} className="sl-spin" /> : <Plus size={14} />}
          </button>
 
-         {isFinalized && <Lock size={16} className="text-red-500/50 ml-2" />}
+         {isFinalized && <Lock size={16} style={{color: 'rgba(239, 68, 68, 0.5)', marginLeft: '0.5rem'}} />}
       </div>
     </div>
   );
 }
 
 function ReadOnlyItem({ item, index }) {
-    const displayDeptPoints = item.points;
+    const displayDeptPoints = item.points || 0;
     return (
-        <div className={`grid grid-cols-12 items-center gap-4 p-5 border-b border-gray-800 transition-all ${index < 3 ? 'bg-gradient-to-r from-yellow-500/5 via-transparent to-transparent' : 'hover:bg-gray-900/50'}`}>
-            <div className="col-span-2 flex justify-center items-center"><RankIcon rank={item.position} /></div>
-            <div className="col-span-7">
-                <div className="font-bold text-white text-xl mb-1">{item.display_name}</div>
-                <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                   <span className="text-gray-400">{item.branch}</span>
+        <div className={`sl-row sl-row-user ${index < 3 ? 'sl-grad-gold' : 'sl-hover-std'}`}>
+            <div className="sl-col-rank">
+                <RankIcon rank={item.position} />
+            </div>
+            <div className="sl-col-name-user">
+                <div className="sl-participant-name">{item.display_name}</div>
+                <div className="sl-participant-meta">
+                   <span className="sl-dept-badge">{item.branch}</span>
                    {displayDeptPoints > 0 && (
-                        <span className="text-yellow-600 bg-yellow-900/20 px-1.5 rounded font-mono font-bold border border-yellow-900/50">
+                        <span className="sl-dept-pts">
                             +{displayDeptPoints} Dept Pts
                         </span>
                     )}
                 </div>
             </div>
-            <div className="col-span-3 text-right pr-6">
+            <div className="sl-col-score-user">
                 <div className="flex flex-col items-end">
-                    <span className="text-2xl font-mono font-bold text-blue-400">{item.score || 0}</span>
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest">Score</span>
+                    <span className="sl-score-user-val">{item.score || 0}</span>
+                    <span className="sl-score-user-lbl">Score</span>
                 </div>
             </div>
         </div>
@@ -105,10 +114,8 @@ export default function SportLeaderboardPage() {
   const params = useParams();
   const sportSlug = params?.slug;
 
-  // ✅ FIX: Use Global Auth Context instead of local fetch
   const { user, loading: authLoading } = useAuth();
 
-  // ✅ FIX: Robust Admin Check
   const isAdmin = user && (
     user.is_staff ||
     user.is_superuser ||
@@ -126,13 +133,14 @@ export default function SportLeaderboardPage() {
   const [sportsLoading, setSportsLoading] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(null);
 
+  // Fetch all sports for switcher
   useEffect(() => {
     const fetchSports = async () => {
       try {
         const res = await api.get('api/sports/');
         setSports(res.data);
       } catch (err) {
-        console.error(err);
+        console.error('Failed to fetch sports:', err);
       } finally {
         setSportsLoading(false);
       }
@@ -140,45 +148,54 @@ export default function SportLeaderboardPage() {
     fetchSports();
   }, []);
 
+  // Fetch leaderboard data
   useEffect(() => {
     if (!sportSlug) return;
 
-    setLoading(true);
-    api.get(`api/leaderboard/sport/${sportSlug}/`)
-      .then(res => {
-          const sorted = [...res.data].sort((a, b) => (b.score || 0) - (a.score || 0));
-          setStandings(sorted);
-          setLoading(false);
-      })
-      .catch(err => {
-          console.error(err);
-          setMsg({type: 'error', text: "Could not load data."});
-          setLoading(false);
-      });
+    const fetchLeaderboard = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`api/leaderboard/sport/${sportSlug}/`);
+        // ✅ FIX: Backend now returns data sorted by position, so no need to re-sort by score
+        setStandings(res.data);
+      } catch (err) {
+        console.error('Failed to load leaderboard:', err);
+        setMsg({type: 'error', text: "Could not load leaderboard data."});
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
   }, [sportSlug]);
 
-  const handleAdjustPoints = async (id, action) => {
+  // ✅ FIX: Renamed from handleAdjustPoints to handleAdjustScore (matches backend)
+  const handleAdjustScore = async (id, action) => {
       setAdjusting(id);
 
-      // Optimistic UI Update
-      setStandings(prev => {
-          const updated = prev.map(item => item.id === id ? {
-              ...item,
-              score: action === 'add' ? (item.score || 0) + 1 : Math.max(0, (item.score || 0) - 1)
-          } : item);
-          return updated.sort((a, b) => (b.score || 0) - (a.score || 0));
-      });
-
       try {
-          await api.post(`api/leaderboard/result/${id}/adjust/`, { action });
-      } catch (e) {
-          setMsg({type: 'error', text: "Failed to sync score. Please try again."});
+          const res = await api.post(`api/leaderboard/result/${id}/adjust/`, { action });
+
+          // ✅ Update only the specific item's score from backend response
+          setStandings(prev => prev.map(item =>
+              item.id === id ? { ...item, score: res.data.score } : item
+          ));
+
+          setMsg({type: 'success', text: res.data.message || 'Score updated successfully'});
           setTimeout(() => setMsg(null), 3000);
 
-          // Revert on error
-          const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
-          const sorted = [...refreshRes.data].sort((a, b) => (b.score || 0) - (a.score || 0));
-          setStandings(sorted);
+      } catch (err) {
+          const errorMsg = err.response?.data?.error || "Failed to adjust score. Please try again.";
+          setMsg({type: 'error', text: errorMsg});
+          setTimeout(() => setMsg(null), 3000);
+
+          // ✅ Refresh from backend on error to ensure consistency
+          try {
+              const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
+              setStandings(refreshRes.data);
+          } catch (refreshErr) {
+              console.error('Failed to refresh data:', refreshErr);
+          }
       } finally {
           setAdjusting(null);
       }
@@ -186,51 +203,67 @@ export default function SportLeaderboardPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const payload = standings.map((item, index) => ({ id: item.id, position: index + 1 }));
+
+    // ✅ Sort by score (highest first), then assign positions
+    const sortedByScore = [...standings].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const payload = sortedByScore.map((item, index) => ({
+        id: item.id,
+        position: index + 1  // Assign positions 1, 2, 3... based on score order
+    }));
 
     try {
         const res = await api.put(`api/leaderboard/sport/${sportSlug}/update/`, payload);
-        const sorted = [...res.data].sort((a, b) => (b.score || 0) - (a.score || 0));
-        setStandings(sorted);
-        setMsg({type: 'success', text: "Standings saved with positions."});
+        setStandings(res.data); // Backend returns sorted by position
+        setMsg({type: 'success', text: "✅ Rankings saved! Positions assigned based on scores."});
         setTimeout(() => setMsg(null), 3000);
     } catch (err) {
-        setMsg({type: 'error', text: "Failed to save ranking."});
+        const errorMsg = err.response?.data?.error || "Failed to save rankings.";
+        setMsg({type: 'error', text: errorMsg});
+        setTimeout(() => setMsg(null), 3000);
     } finally {
         setSaving(false);
     }
-  };
+};
 
-  const handleUnlock = async () => {
-      if(!confirm("Are you sure you want to unlock? If points were already distributed, this might cause inconsistencies.")) return;
+  // ✅ FIX: Added unfinalize endpoint support
+  const handleUnfinalize = async () => {
+      if(!confirm("Are you sure you want to unfinalize? This will allow editing rankings again.")) return;
 
-      // Optimistically unlock UI
-      setStandings(prev => prev.map(s => ({...s, sport_is_finalized: false})));
-      setMsg({type: 'success', text: "Unlocked! You can now edit scores."});
-      setTimeout(() => setMsg(null), 3000);
-
+      setRefreshing(true);
       try {
-        await api.post(`api/leaderboard/sport/${sportSlug}/unlock/`);
-      } catch(e) {
-        console.log("Backend unlock not supported or failed, but UI is unlocked.");
+          await api.post(`api/leaderboard/sport/${sportSlug}/unfinalize/`);
+          setMsg({type: 'success', text: "🔓 Unlocked! You can now edit scores."});
+          setTimeout(() => setMsg(null), 3000);
+
+          // Refresh data to update finalization status
+          const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
+          setStandings(refreshRes.data);
+      } catch(err) {
+          const errorMsg = err.response?.data?.error || "Failed to unfinalize. Please try again.";
+          setMsg({type: 'error', text: errorMsg});
+          setTimeout(() => setMsg(null), 3000);
+      } finally {
+          setRefreshing(false);
       }
   };
 
-  const handleFinalize = async () => { setShowConfirmDialog('finalize'); };
-  const handleReset = async () => { setShowConfirmDialog('reset'); };
+  const handleFinalize = () => { setShowConfirmDialog('finalize'); };
+  const handleReset = () => { setShowConfirmDialog('reset'); };
 
   const confirmFinalize = async () => {
       setShowConfirmDialog(null);
       setRefreshing(true);
       try {
-          await api.post(`api/leaderboard/sport/${sportSlug}/finalize/`);
-          setMsg({type: 'success', text: "🏆 Points Distributed!"});
+          const res = await api.post(`api/leaderboard/sport/${sportSlug}/finalize/`);
+          setMsg({type: 'success', text: res.data.message || "🏆 Rankings finalized!"});
           setTimeout(() => setMsg(null), 3000);
+
+          // Refresh to get updated finalization status
           const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
-          const sorted = [...refreshRes.data].sort((a, b) => (b.score || 0) - (a.score || 0));
-          setStandings(sorted);
-      } catch (e) {
-          setMsg({type: 'error', text: "Error finalizing. Please try again."});
+          setStandings(refreshRes.data);
+      } catch (err) {
+          const errorMsg = err.response?.data?.error || "Failed to finalize. Please try again.";
+          setMsg({type: 'error', text: errorMsg});
           setTimeout(() => setMsg(null), 3000);
       } finally {
           setRefreshing(false);
@@ -241,44 +274,54 @@ export default function SportLeaderboardPage() {
       setShowConfirmDialog(null);
       setRefreshing(true);
       try {
-          await api.post(`api/leaderboard/sport/${sportSlug}/reset/`);
-          setMsg({type: 'success', text: "✅ Scores reset successfully!"});
+          const res = await api.post(`api/leaderboard/sport/${sportSlug}/reset/`);
+          setMsg({type: 'success', text: res.data.message || "✅ Leaderboard reset successfully!"});
           setTimeout(() => setMsg(null), 3000);
+
+          // Refresh data after reset
           const refreshRes = await api.get(`api/leaderboard/sport/${sportSlug}/`);
-          const sorted = [...refreshRes.data].sort((a, b) => (b.score || 0) - (a.score || 0));
-          setStandings(sorted);
-      } catch (e) {
-          setMsg({type: 'error', text: "Failed to reset scores. Please try again."});
+          setStandings(refreshRes.data);
+      } catch (err) {
+          const errorMsg = err.response?.data?.error || "Failed to reset. Please try again.";
+          setMsg({type: 'error', text: errorMsg});
           setTimeout(() => setMsg(null), 3000);
       } finally {
           setRefreshing(false);
       }
   };
 
-  if (loading || authLoading) return <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4"><Loader2 className="w-10 h-10 animate-spin text-blue-500" /><p className="text-gray-500">Loading data...</p></div>;
+  if (loading || authLoading) return (
+      <div className="sl-loading-screen">
+          <Loader2 className="sl-spin" style={{ width: 40, height: 40, color: '#3b82f6' }} />
+          <p>Loading leaderboard...</p>
+      </div>
+  );
 
   const isFinalized = standings.length > 0 ? standings[0].sport_is_finalized : false;
-  const sportName = standings.length > 0 ? standings[0].sport_name : sportSlug.replace(/-/g, ' ');
+  const sportName = standings.length > 0 ? standings[0].sport_name : sportSlug?.replace(/-/g, ' ') || 'Sport';
 
   const displayedStandings = isAdmin ? standings : standings.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
+    <div className="sl-container">
       {/* --- Confirm Dialog --- */}
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-3">
-              {showConfirmDialog === 'finalize' ? 'Finalize Rankings?' : '⚠️ Reset Scores?'}
+        <div className="sl-overlay">
+          <div className="sl-modal">
+            <h3 className="sl-modal-title">
+              {showConfirmDialog === 'finalize' ? '🏆 Finalize Rankings?' : '⚠️ Reset Scores?'}
             </h3>
-            <p className="text-gray-400 mb-6">
+            <p className="sl-modal-text">
               {showConfirmDialog === 'finalize'
-                ? 'Points will be distributed to departments. This action cannot be undone.'
-                : 'All scores for this sport will be reset to zero. This action cannot be undone.'}
+                ? 'Department points will be locked and counted towards the overall leaderboard. This action cannot be undone without unfinalizing first.'
+                : 'All scores and positions for this sport will be reset. Rankings will return to their default order. This action cannot be undone.'}
             </p>
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowConfirmDialog(null)} className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-medium">Cancel</button>
-              <button onClick={showConfirmDialog === 'finalize' ? confirmFinalize : confirmReset} className={`px-4 py-2 rounded-lg font-medium ${showConfirmDialog === 'finalize' ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-red-600 hover:bg-red-500 text-white'}`}>
+            <div className="sl-modal-actions">
+              <button onClick={() => setShowConfirmDialog(null)} className="sl-modal-btn-cancel">Cancel</button>
+              <button
+                  onClick={showConfirmDialog === 'finalize' ? confirmFinalize : confirmReset}
+                  className={`sl-modal-btn-confirm ${showConfirmDialog === 'finalize' ? 'sl-btn-blue' : 'sl-btn-red'}`}
+              >
                 {showConfirmDialog === 'finalize' ? 'Finalize' : 'Reset'}
               </button>
             </div>
@@ -288,118 +331,153 @@ export default function SportLeaderboardPage() {
 
       {/* --- Overlay Spinner --- */}
       {refreshing && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-40">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col items-center gap-4">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
-            <p className="text-white font-medium">Updating standings...</p>
+        <div className="sl-overlay sl-overlay-light">
+          <div className="sl-spinner-box">
+            <Loader2 className="sl-spin sl-spinner-lg" />
+            <p className="sl-spinner-text">Processing...</p>
           </div>
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <Link href="/auth/dashboard" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Go to Dashboard</span>
+      <div className="sl-wrapper">
+        <div className="sl-back-section">
+          <Link href="/auth/dashboard" className="sl-back-link">
+            <ArrowLeft className="sl-back-icon" />
+            <span>Back to Dashboard</span>
           </Link>
         </div>
 
         {/* --- Sport Switcher --- */}
-        <div className="mb-8 border border-purple-500/30 rounded-lg p-6 bg-purple-500/5 backdrop-blur-sm">
-          <h3 className="text-sm font-bold text-purple-400 uppercase tracking-wide mb-4">Switch Sport</h3>
+        <div className="sl-switcher-container">
+          <h3 className="sl-switcher-title">Switch Sport</h3>
           {sportsLoading ? (
-            <div className="flex justify-center items-center h-10"><Loader2 className="w-5 h-5 animate-spin text-purple-500" /></div>
+            <div className="flex justify-center items-center h-10">
+                <Loader2 className="sl-spin" style={{width: 20, height: 20, color: '#a855f7'}} />
+            </div>
           ) : sports.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="sl-switcher-grid">
               {sports.map((sport) => (
                 <Link
                   key={sport.id}
                   href={sport.slug ? `/sports/leaderboard/${sport.slug}` : '#'}
-                  className={`p-2 rounded-lg text-sm font-semibold transition-all block text-center ${sport.slug === sportSlug ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-purple-400'}`}
+                  className={`sl-sport-chip ${
+                      sport.slug === sportSlug ? 'sl-chip-active' : 'sl-chip-inactive'
+                  }`}
                 >
                   {sport.name}
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No sports available.</p>
+            <p style={{color: '#6b7280'}}>No sports available.</p>
           )}
         </div>
 
         {/* --- Header Controls --- */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-gray-800 gap-4">
-            <div>
-                <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 capitalize mb-2">{sportName}</h1>
-                <div className="flex items-center gap-3">
-                    <p className="text-gray-400 text-sm uppercase font-semibold">
+        <div className="sl-header-row">
+            <div className="sl-title-group">
+                <h1 className="sl-main-title">{sportName}</h1>
+                <div className="sl-status-row">
+                    <p className="sl-mode-label">
                       {isAdmin ? 'Full Standings (Admin Mode)' : 'Top 5 Rankings'}
                     </p>
-                    {isFinalized ? <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded flex items-center gap-1"><CheckCircle size={12}/> FINALIZED</span>
-                                 : <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded flex items-center gap-1"><Loader2 size={12} className="animate-spin"/> DRAFT</span>}
+                    {isFinalized ? (
+                        <span className="sl-badge sl-badge-final">
+                            <CheckCircle size={12}/> FINALIZED
+                        </span>
+                    ) : (
+                        <span className="sl-badge sl-badge-draft">
+                            <Loader2 size={12} className="sl-spin"/> DRAFT
+                        </span>
+                    )}
                 </div>
             </div>
 
             {/* --- ADMIN ACTIONS --- */}
             {isAdmin && (
-                <div className="flex flex-wrap gap-3">
+                <div className="sl-admin-toolbar">
+                    {/* ✅ FIX: Changed from Unlock to Unfinalize */}
                     {isFinalized && (
-                       <button onClick={handleUnlock} className="bg-amber-900/30 hover:bg-amber-900/50 text-amber-500 px-4 py-2 rounded-xl font-bold flex items-center gap-2 border border-amber-900/50 transition-colors">
-                          <LockOpen size={16} /> Unlock
+                       <button onClick={handleUnfinalize} className="sl-btn sl-btn-unlock">
+                          <LockOpen size={16} /> Unfinalize
                        </button>
                     )}
 
-                    <button onClick={handleReset} className="bg-red-900/30 hover:bg-red-900/50 text-red-400 px-4 py-2 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2 transition-colors">
+                    <button
+                        onClick={handleReset}
+                        disabled={isFinalized}
+                        className="sl-btn sl-btn-reset"
+                    >
                         <RotateCcw size={16} /> Reset
                     </button>
-                    <button onClick={handleSave} disabled={isFinalized || saving} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50 transition-colors">
-                        {saving ? 'Saving...' : 'Save Positions'}
+
+                    <button
+                        onClick={handleSave}
+                        disabled={isFinalized || saving}
+                        className="sl-btn sl-btn-save"
+                    >
+                        {saving ? <><Loader2 size={16} className="sl-spin" /> Saving...</> : 'Save Positions'}
                     </button>
-                    <button onClick={handleFinalize} disabled={isFinalized} className={`px-4 py-2 rounded-xl font-bold disabled:opacity-50 transition-colors ${isFinalized ? 'bg-green-900/30 text-green-500' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}>
-                        {isFinalized ? 'Distributed' : 'Finalize'}
+
+                    <button
+                        onClick={handleFinalize}
+                        disabled={isFinalized}
+                        className={`sl-btn ${isFinalized ? 'sl-btn-distributed' : 'sl-btn-finalize'}`}
+                    >
+                        {isFinalized ? <><CheckCircle size={16} /> Finalized</> : 'Finalize'}
                     </button>
                 </div>
             )}
         </div>
 
-        {msg && <div className={`mb-8 p-4 rounded-xl border text-center font-medium ${msg.type === 'error' ? 'bg-red-900/20 border-red-800 text-red-200' : 'bg-green-900/20 border-green-800 text-green-200'}`}>{msg.text}</div>}
-
-        <div className="bg-gray-900/50 rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
-             <div className="grid grid-cols-12 gap-4 p-4 bg-gray-900 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                <div className="col-span-2 text-center">Rank</div>
-                <div className={`${isAdmin ? 'col-span-6' : 'col-span-7'}`}>Participant & Dept</div>
-                <div className={`${isAdmin ? 'col-span-4' : 'col-span-3'} text-center`}>Score{isAdmin ? ' / Control' : ''}</div>
+        {/* --- Messages --- */}
+        {msg && (
+            <div className={`sl-msg ${msg.type === 'error' ? 'sl-msg-error' : 'sl-msg-success'}`}>
+                {msg.text}
             </div>
-            {standings.length === 0 ? <div className="p-12 text-center text-gray-500">No results yet.</div> :
-             isAdmin ? (
+        )}
+
+        {/* --- Table --- */}
+        <div className="sl-table-card">
+             <div className="sl-table-head">
+                <div className="sl-col-rank">Rank</div>
+                <div className={`${isAdmin ? 'sl-col-name-admin' : 'sl-col-name-user'}`}>Participant & Dept</div>
+                <div className={`${isAdmin ? 'sl-col-ctrl-admin' : 'sl-col-score-user'}`}>
+                    Score{isAdmin ? ' / Control' : ''}
+                </div>
+            </div>
+
+            {standings.length === 0 ? (
+                <div className="sl-empty-msg">No participants yet. Registrations will appear here automatically.</div>
+            ) : isAdmin ? (
                 // ✅ ADMIN VIEW (With Controls)
-                <div className="divide-y divide-gray-800/50">
-                    {standings.map((item, index) => <AdminItem key={item.id} item={item} index={index} handleAdjustPoints={handleAdjustPoints} isFinalized={isFinalized} adjusting={adjusting} />)}
+                <div className="sl-row-group">
+                    {standings.map((item, index) => (
+                        <AdminItem
+                            key={item.id}
+                            item={item}
+                            index={index}
+                            handleAdjustScore={handleAdjustScore}
+                            isFinalized={isFinalized}
+                            adjusting={adjusting}
+                        />
+                    ))}
                 </div>
              ) : (
                 // ❌ USER VIEW (ReadOnly)
-                <div className="divide-y divide-gray-800/50">
-                    {displayedStandings.map((item, index) => <ReadOnlyItem key={item.id} item={item} index={index} />)}
+                <div className="sl-row-group">
+                    {displayedStandings.map((item, index) => (
+                        <ReadOnlyItem key={item.id} item={item} index={index} />
+                    ))}
 
                     {standings.length > 5 && (
-                        <div className="p-4 text-center text-gray-500 text-sm bg-gray-900/30">
-                            Showing top 5 participants.
+                        <div className="sl-show-more">
+                            Showing top 5 participants. {standings.length - 5} more hidden.
                         </div>
                     )}
                 </div>
              )}
         </div>
-
-        {/*/!* --- DEBUG PANEL (Only visible if you are NOT admin but think you should be) --- *!/*/}
-        {/*{!isAdmin && (*/}
-        {/*    <div className="mt-12 p-4 bg-gray-900 border border-gray-800 rounded text-xs text-gray-600 font-mono">*/}
-        {/*        <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold"><ShieldAlert size={14}/> Debug: Admin Permissions Missing</div>*/}
-        {/*        <p>User ID: {user?.id || 'Not logged in'}</p>*/}
-        {/*        <p>Is Staff: {user?.is_staff ? 'Yes' : 'No'}</p>*/}
-        {/*        <p>Is Superuser: {user?.is_superuser ? 'Yes' : 'No'}</p>*/}
-        {/*        <p>Is Manager: {user?.is_manager ? 'Yes' : 'No'}</p>*/}
-        {/*        <p>Role: {user?.role || 'None'}</p>*/}
-        {/*    </div>*/}
-        {/*)}*/}
       </div>
     </div>
   );
