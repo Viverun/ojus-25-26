@@ -1,10 +1,6 @@
 /* dashboard.css
-
-NOTE: The vast majority of the styling is handled by Tailwind CSS classes
-applied directly in the Dashboard.jsx file (e.g., 'bg-slate-950', 'text-4xl', 'rounded-xl', etc.).
-In a typical Next.js/Tailwind setup, these remain in the JSX.
-
-This file only contains the custom CSS needed for the 'custom-scrollbar' class.
+   NOTE: The majority of styling is handled by Tailwind classes in Dashboard.jsx.
+   This file only contains the custom CSS for the 'custom-scrollbar' class.
 */
 
 .custom-scrollbar::-webkit-scrollbar {
