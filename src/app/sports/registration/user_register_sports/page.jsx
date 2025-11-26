@@ -22,7 +22,7 @@ const useIsAdmin = () => {
     return isAdmin;
 };
 
-// --- Components remain the same ---
+// --- Components ---
 const RankIcon = ({ rank }) => {
     if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-400 fill-yellow-400" />;
     if (rank === 2) return <Medal className="w-6 h-6 text-gray-300 fill-gray-300" />;
@@ -121,18 +121,24 @@ export default function SportLeaderboardPage() {
 
   // Fetch and auto-sort standings
   useEffect(() => {
-    if (!sportSlug) return;
+    // FIX: If no slug is present, stop loading immediately
+    if (!sportSlug) {
+        setLoading(false);
+        return;
+    }
 
     setLoading(true);
     api.get(`api/leaderboard/sport/${sportSlug}/`)
       .then(res => {
           const sorted = [...res.data].sort((a, b) => (b.score || 0) - (a.score || 0));
           setStandings(sorted);
-          setLoading(false);
       })
       .catch(err => {
           console.error(err);
           setMsg({type: 'error', text: "Could not load data."});
+      })
+      // FIX: Ensure loading state is turned off regardless of success or failure
+      .finally(() => {
           setLoading(false);
       });
   }, [sportSlug]);
@@ -187,7 +193,6 @@ export default function SportLeaderboardPage() {
       }
   };
 
-  // NEW: Reset leaderboard handler
   const handleReset = async () => {
       if(!confirm("⚠️ Reset this leaderboard? This will:\n- Clear all scores\n- Reset positions\n- Revert finalization status\n- Remove distributed department points\n\nThis action cannot be undone!")) return;
 
@@ -212,7 +217,8 @@ export default function SportLeaderboardPage() {
   if (loading) return <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4"><Loader2 className="w-10 h-10 animate-spin text-blue-500" /><p className="text-gray-500">Loading standings...</p></div>;
 
   const isFinalized = standings.length > 0 ? standings[0].sport_is_finalized : false;
-  const sportName = standings.length > 0 ? standings[0].sport_name : sportSlug.replace(/-/g, ' ');
+  // FIX: Safety check for sportName in case sportSlug is undefined
+  const sportName = standings.length > 0 ? standings[0].sport_name : (sportSlug ? sportSlug.replace(/-/g, ' ') : 'Select a Sport');
 
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
@@ -291,7 +297,7 @@ export default function SportLeaderboardPage() {
                 <div className={`${isAdmin ? 'col-span-6' : 'col-span-7'}`}>Participant & Dept</div>
                 <div className={`${isAdmin ? 'col-span-4' : 'col-span-3'} text-center`}>Score{isAdmin ? ' / Control' : ''}</div>
             </div>
-            {standings.length === 0 ? <div className="p-12 text-center text-gray-500">No results yet.</div> :
+            {standings.length === 0 ? <div className="p-12 text-center text-gray-500">No results yet (or no sport selected).</div> :
              isAdmin ? (
                 <div className="divide-y divide-gray-800/50">
                     {standings.map((item, index) => <AdminItem key={item.id} item={item} index={index} handleAdjustPoints={handleAdjustPoints} isFinalized={isFinalized} />)}
