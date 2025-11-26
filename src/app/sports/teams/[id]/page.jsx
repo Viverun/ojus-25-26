@@ -1,259 +1,320 @@
-"use client"
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import api from '@/api/api'
-import { useAuth } from '@/context/AuthContext'
+"use client";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import api from "@/api/api";
+import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft,
   Trophy,
-  MapPin,
-  Shield,
-  UserCircle,
   Users,
-  Edit3,
+  Crown,
+  Copy,
+  Check,
   Trash2,
-  Loader2,
+  LogOut,
+  UserPlus,
+  ShieldAlert,
   Calendar
-} from 'lucide-react'
+} from "lucide-react";
 
-export default function TeamDetail() {
-  const params = useParams()
-  const router = useRouter()
-  const { id } = params || {}
+export default function TeamDetails() {
+  // useParams() automatically grabs the value from the [id] folder
+  const params = useParams();
+  const id = params?.id;
 
-  const [team, setTeam] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [deleting, setDeleting] = useState(false)
+  const router = useRouter();
+  const { user } = useAuth();
 
-  const { user, loading: authLoading } = useAuth()
+  const [team, setTeam] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    let mounted = true
+    // Safety check: If for some reason ID isn't ready, wait for it
+    if (!id) return;
 
-    async function fetchTeam() {
+    const fetchTeam = async () => {
       try {
-        const res = await api.get(`/api/teams/${id}/`)
-        if (mounted) setTeam(res.data)
-      } catch (e) {
-        console.error(e)
-        if (e.response?.status === 401) {
-          router.push("/auth/login")
-        }
+        // Ensure this endpoint matches your backend (e.g., trailing slash)
+        const res = await api.get(`teams/${id}/`);
+        setTeam(res.data);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        setError("Team not found or access denied.");
       } finally {
-        if (mounted) setLoading(false)
+        setLoading(false);
       }
+    };
+
+    fetchTeam();
+  }, [id]);
+
+  // --- Helpers ---
+  // Check if current user is the captain
+  const isCaptain = user && team?.captain && (user.username === team.captain.username);
+  // Check if current user is already a member
+  const isMember = user && team?.members?.some(m => m.username === user.username);
+  // Check if team is full
+  const isFull = team?.members?.length >= (team?.sport?.max_players || 99);
+
+  // --- Handlers ---
+  const handleCopyCode = () => {
+    if (team?.team_code) {
+      navigator.clipboard.writeText(team.team_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
+  };
 
-    if (id) fetchTeam()
+  const handleJoin = async () => {
+    setActionLoading(true);
+    try {
+      await api.post(`teams/${id}/join/`, { team_code: team.team_code });
+      window.location.reload();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to join team");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-    return () => { mounted = false }
-  }, [id, router])
+  const handleLeave = async () => {
+    if (!confirm("Are you sure you want to leave this team?")) return;
+    setActionLoading(true);
+    try {
+      await api.post(`teams/${id}/leave/`);
+      router.push("/sports/teams/list/all");
+    } catch (err) {
+      alert("Failed to leave team");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${team.name}"? This action cannot be undone.`)) return
-
-    setDeleting(true)
+    if (!confirm("WARNING: This will disband the team permanently. Continue?")) return;
+    setActionLoading(true);
     try {
-      await api.delete(`/api/teams/${team.id}/`)
-      router.push('/sports/teams/list/all')
-    } catch (e) {
-      alert('Failed to delete: ' + (e.response?.data?.detail || e.message))
-      setDeleting(false)
+      await api.delete(`teams/${id}/`);
+      router.push("/sports/teams/list/all");
+    } catch (err) {
+      alert("Failed to delete team");
+    } finally {
+      setActionLoading(false);
     }
-  }
+  };
 
-  // 1. Loading State
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-          <span className="text-slate-400 text-sm font-medium">Loading team details...</span>
-        </div>
-      </div>
-    )
-  }
+  // --- Render States ---
+  if (loading) return <DetailSkeleton />;
 
-  // 2. Not Found State
-  if (!team) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-800">
-            <Shield className="w-8 h-8 text-slate-500" />
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Team Not Found</h1>
-          <p className="text-slate-400 mb-6">The team you are looking for doesn't exist or has been removed.</p>
-          <Link
-            href="/sports/teams/list/all"
-            className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 px-5 rounded-lg transition-colors border border-slate-700"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Teams
-          </Link>
-        </div>
-      </div>
-    )
-  }
+  if (error) return (
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+      <ShieldAlert className="w-12 h-12 mb-4 text-red-500" />
+      <h2 className="text-xl text-white font-bold">{error}</h2>
+      <button
+        onClick={() => router.push('/auth/dashboard')}
+        className="mt-6 px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white transition-colors"
+      >
+        Return to Dashboard
+      </button>
+    </div>
+  );
 
-  const isManager = user?.moodleID === team.manager?.moodleID
-
+  // --- Main Render ---
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-200 py-10 px-4 sm:px-6">
-      <div className="container mx-auto max-w-4xl">
+    <main className="min-h-screen bg-slate-950 text-slate-200 relative overflow-hidden selection:bg-purple-500/30">
+       {/* Ambient Background */}
+       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] right-[30%] w-[40%] h-[40%] bg-purple-900/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px]" />
+      </div>
 
-        {/* Navigation Breadcrumb */}
-        <div className="mb-6">
-          <Link
-            href="/sports/teams/list/all"
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Teams
-          </Link>
-        </div>
+      <div className="container mx-auto max-w-5xl px-4 sm:px-6 py-12">
 
-        {/* Header Section */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-6 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-white">{team.name}</h1>
-                {team.sport?.name && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs font-semibold text-slate-300">
-                    <Trophy className="w-3 h-3" />
-                    {team.sport.name}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-4 text-slate-400 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4" />
-                  {team.branch}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4" />
-                  {team.members?.length || 0} Members
-                </div>
-              </div>
+        {/* Navigation Button */}
+        <button
+          onClick={() => router.push('/auth/dashboard')}
+          className="group flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors"
+        >
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border border-slate-700 group-hover:border-purple-500/50 group-hover:bg-purple-500/10 transition-all">
+             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          </div>
+          <span className="font-medium">Back to Dashboard</span>
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+          {/* Left Column: Info & Roster */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* Header Card */}
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+
+               <div className="relative z-10">
+                 <div className="flex items-center gap-3 mb-4">
+                    <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                        <Trophy className="w-3 h-3" />
+                        {team.sport?.name || "Sport"}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-2 ${isFull ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>
+                        {isFull ? "Team Full" : "Recruiting"}
+                    </span>
+                 </div>
+
+                 <h1 className="text-4xl md:text-5xl font-black text-white mb-2">{team.name}</h1>
+                 <p className="text-slate-400 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" /> Created on {new Date(team.created_at || Date.now()).toLocaleDateString()}
+                 </p>
+               </div>
             </div>
 
-            {/* Actions for Manager */}
-            {isManager && (
-              <div className="flex items-center gap-3 mt-4 md:mt-0">
-                <Link
-                  href={`/sports/teams/${team.id}/edit`}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+            {/* Team Code (Private) */}
+            {(isMember || isCaptain) && (
+              <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-purple-500/30 transition-all">
+                <div>
+                    <h3 className="text-sm text-slate-400 uppercase tracking-wider font-semibold mb-1">Team Code</h3>
+                    <p className="text-xs text-slate-500">Share this code to invite members</p>
+                </div>
+
+                <div
+                    onClick={handleCopyCode}
+                    className="cursor-pointer flex items-center gap-4 bg-slate-950 border border-slate-800 rounded-xl px-5 py-3 hover:border-purple-500/50 transition-all active:scale-95 w-full sm:w-auto justify-between"
                 >
-                  <Edit3 className="w-4 h-4" />
-                  Edit Team
-                </Link>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-red-900/30 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-800 text-sm font-medium rounded-lg transition-all disabled:opacity-50"
-                >
-                  {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  <span className="hidden sm:inline">Delete</span>
-                </button>
+                    <span className="text-2xl font-mono text-white tracking-widest">{team.team_code}</span>
+                    {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-slate-400 hover:text-purple-400" />}
+                </div>
               </div>
             )}
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Left Column: Leadership Info */}
-          <div className="lg:col-span-1 space-y-6">
-
-            {/* Manager Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-5 h-5 text-blue-400" />
-                <h3 className="font-semibold text-white">Manager</h3>
-              </div>
-              <div className="p-3 bg-slate-950/50 rounded-lg border border-slate-800/50">
-                <p className="text-slate-200 font-medium">
-                  {team.manager?.username || <span className="text-slate-500 italic">Unassigned</span>}
-                </p>
-                {team.manager?.moodleID && (
-                  <p className="text-xs text-slate-500 mt-1 font-mono">ID: {team.manager.moodleID}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Captain Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <UserCircle className="w-5 h-5 text-amber-400" />
-                <h3 className="font-semibold text-white">Captain</h3>
-              </div>
-              <div className="p-3 bg-slate-950/50 rounded-lg border border-slate-800/50">
-                <p className="text-slate-200 font-medium">
-                  {team.captain?.username || <span className="text-slate-500 italic">Unassigned</span>}
-                </p>
-                {team.captain?.moodleID && (
-                  <p className="text-xs text-slate-500 mt-1 font-mono">ID: {team.captain.moodleID}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Timestamp/Extra Info (Optional placeholder) */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-2 text-slate-400">
-                <Calendar className="w-4 h-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Status</span>
-              </div>
-              <p className="text-sm text-slate-300">
-                Active • {team.members?.length >= 2 ? 'Ready to play' : 'Recruiting'}
-              </p>
-            </div>
-          </div>
-
-          {/* Right Column: Roster */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col h-full">
-              <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-emerald-400" />
-                  <h3 className="font-semibold text-white">Team Roster</h3>
+            {/* Roster List */}
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Users className="w-5 h-5 text-purple-400" />
+                        Team Roster
+                    </h3>
+                    <span className="text-slate-400 text-sm">
+                        {team.members?.length} / {team.sport?.max_players || "?"} Members
+                    </span>
                 </div>
-                <span className="text-xs font-medium px-2 py-1 bg-slate-800 rounded text-slate-400">
-                  Total: {team.members?.length || 0}
-                </span>
-              </div>
 
-              <div className="p-5">
-                {team.members?.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {team.members.map(member => (
-                      <div
-                        key={member.id}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 transition-colors"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0 text-slate-400 font-medium text-xs">
-                          {member.username.substring(0, 2).toUpperCase()}
+                <div className="space-y-3">
+                    {team.members?.map((member) => (
+                        <div key={member.username} className="flex items-center justify-between p-4 rounded-xl bg-slate-800/40 border border-white/5 hover:bg-slate-800/60 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center font-bold text-white border border-slate-700">
+                                    {member.first_name?.[0] || member.username[0]}
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-slate-200 flex items-center gap-2">
+                                        {member.first_name ? `${member.first_name} ${member.last_name || ''}` : member.username}
+                                        {team.captain?.username === member.username && (
+                                            <Crown className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                        )}
+                                    </p>
+                                    <p className="text-xs text-slate-500">{member.branch || "Student"}</p>
+                                </div>
+                            </div>
+                            {team.captain?.username === member.username && (
+                                <span className="text-xs bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded border border-yellow-500/20">Captain</span>
+                            )}
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-slate-200 text-sm font-medium truncate">{member.username}</p>
-                          <p className="text-slate-500 text-xs font-mono mt-0.5 truncate">{member.moodleID}</p>
-                        </div>
-                      </div>
                     ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-                    <Users className="w-10 h-10 mb-3 opacity-20" />
-                    <p>No members added yet</p>
-                  </div>
-                )}
-              </div>
+
+                    {/* Open Slots */}
+                    {Array.from({ length: Math.max(0, (team.sport?.max_players || 0) - (team.members?.length || 0)) }).map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-dashed border-slate-800 text-slate-600">
+                            <div className="w-10 h-10 rounded-full bg-slate-900/50 flex items-center justify-center">
+                                <UserPlus className="w-4 h-4 opacity-50" />
+                            </div>
+                            <span className="text-sm font-medium italic">Open Slot</span>
+                        </div>
+                    ))}
+                </div>
             </div>
+          </div>
+
+          {/* Right Column: Actions */}
+          <div className="lg:col-span-1">
+             <div className="sticky top-8 space-y-6">
+
+                <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+                    <h3 className="text-lg font-bold text-white mb-4">Team Actions</h3>
+
+                    <div className="space-y-3">
+                        {isCaptain ? (
+                            <button
+                                onClick={handleDelete}
+                                disabled={actionLoading}
+                                className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-4 rounded-xl font-semibold transition-all hover:scale-[1.02]"
+                            >
+                                {actionLoading ? <span className="animate-spin">⌛</span> : <Trash2 className="w-5 h-5" />}
+                                Disband Team
+                            </button>
+                        ) : isMember ? (
+                            <button
+                                onClick={handleLeave}
+                                disabled={actionLoading}
+                                className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 py-4 rounded-xl font-semibold transition-all hover:scale-[1.02]"
+                            >
+                                {actionLoading ? <span className="animate-spin">⌛</span> : <LogOut className="w-5 h-5" />}
+                                Leave Team
+                            </button>
+                        ) : !isFull ? (
+                            <button
+                                onClick={handleJoin}
+                                disabled={actionLoading}
+                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white shadow-lg shadow-purple-900/20 py-4 rounded-xl font-semibold transition-all hover:scale-[1.02]"
+                            >
+                                {actionLoading ? <span className="animate-spin">⌛</span> : <UserPlus className="w-5 h-5" />}
+                                Join Team
+                            </button>
+                        ) : (
+                            <div className="w-full py-4 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-500 text-center font-medium cursor-not-allowed">
+                                Team is Full
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-white/5">
+                        <h4 className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-3">Captain</h4>
+                        <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 border border-purple-500/30">
+                                <Crown className="w-5 h-5" />
+                             </div>
+                             <div>
+                                <p className="text-sm font-bold text-white">
+                                    {team.captain?.first_name ? `${team.captain.first_name} ${team.captain.last_name || ''}` : team.captain?.username}
+                                </p>
+                                <p className="text-xs text-slate-400">{team.captain?.email || "No contact info"}</p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+             </div>
           </div>
 
         </div>
       </div>
     </main>
-  )
+  );
+}
+
+function DetailSkeleton() {
+    return (
+        <div className="min-h-screen bg-slate-950 p-6 flex flex-col items-center pt-20">
+            <div className="w-full max-w-5xl space-y-8 animate-pulse">
+                <div className="h-6 w-32 bg-slate-800 rounded"></div>
+                <div className="h-48 w-full bg-slate-900 rounded-3xl border border-slate-800"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 h-96 bg-slate-900 rounded-3xl border border-slate-800"></div>
+                    <div className="h-64 bg-slate-900 rounded-3xl border border-slate-800"></div>
+                </div>
+            </div>
+        </div>
+    )
 }

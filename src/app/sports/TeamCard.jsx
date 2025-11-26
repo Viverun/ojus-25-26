@@ -7,13 +7,19 @@ import { Users, Trophy, MapPin, UserCircle, Shield, Eye, Edit3, Trash2, Loader2 
 function TeamCard({ team, onDeleted }) {
   const [deleting, setDeleting] = useState(false)
 
-  async function handleDelete() {
-    // In a full production app, replace native confirm with a Modal component
+  async function handleDelete(e) {
+    // 🛑 CRITICAL FIX: Prevent click from bubbling up or triggering navigation
+    e.preventDefault()
+    e.stopPropagation()
+
     if (!confirm(`Are you sure you want to delete "${team.name}"? This action cannot be undone.`)) return
 
     setDeleting(true)
     try {
-      await api.delete(`api/teams/${team.id}/`)
+      // ✅ FIX: Added leading slash ensures correct API path
+      await api.delete(`/api/teams/${team.id}/`)
+
+      // Notify parent to remove from UI immediately
       if (onDeleted) onDeleted(team.id)
     } catch (e) {
       alert('Failed to delete: ' + (e.response?.data?.detail || e.message))
@@ -23,8 +29,13 @@ function TeamCard({ team, onDeleted }) {
 
   return (
     <div className="group h-full bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-600 transition-all duration-200 flex flex-col">
-      {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
+
+      {/* ✅ UX IMPROVEMENT:
+         Make the main body a Link so the whole card is clickable
+         (except the buttons at the bottom)
+      */}
+      <Link href={`/sports/teams/${team.id}`} className="flex-1 p-5 flex flex-col hover:bg-slate-800/50 transition-colors">
+
         {/* Header with sport badge */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex-1 min-w-0">
@@ -41,7 +52,7 @@ function TeamCard({ team, onDeleted }) {
         </div>
 
         {/* Details Section - Compact Grid */}
-        <div className="flex-1 space-y-3 mb-5">
+        <div className="flex-1 space-y-3 mb-2">
           {/* Branch */}
           <div className="flex items-center gap-2.5 text-sm">
             <div className="w-8 h-8 rounded bg-slate-800 flex items-center justify-center flex-shrink-0">
@@ -92,50 +103,46 @@ function TeamCard({ team, onDeleted }) {
             </div>
           </div>
         </div>
+      </Link>
 
-        {/* Divider */}
-        <div className="h-px bg-slate-800 mb-4" />
+      {/* Divider */}
+      <div className="h-px bg-slate-800" />
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-2">
-          <Link
-            href={`/sports/teams/${team.id}`}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-md transition-colors"
-          >
-            <Eye className="w-4 h-4 flex-shrink-0" />
-            <span className="text-xs font-medium">View</span>
-          </Link>
+      {/* Action Buttons - Outside the Link to prevent conflict */}
+      <div className="grid grid-cols-3 divide-x divide-slate-800 bg-slate-900/50">
+        <Link
+          href={`/sports/teams/${team.id}`}
+          className="flex flex-col items-center justify-center gap-1 py-3 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+        >
+          <Eye className="w-4 h-4" />
+          <span className="text-[10px] font-bold uppercase">View</span>
+        </Link>
 
-          <Link
-            href={`/sports/teams/${team.id}/edit`}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 bg-blue-900/20 hover:bg-blue-900/30 text-blue-400 hover:text-blue-300 border border-blue-900/30 hover:border-blue-800 rounded-md transition-colors"
-          >
-            <Edit3 className="w-4 h-4 flex-shrink-0" />
-            <span className="text-xs font-medium">Edit</span>
-          </Link>
+        <Link
+          href={`/sports/teams/${team.id}/edit`}
+          className="flex flex-col items-center justify-center gap-1 py-3 text-blue-400 hover:text-blue-300 hover:bg-blue-900/10 transition-colors"
+        >
+          <Edit3 className="w-4 h-4" />
+          <span className="text-[10px] font-bold uppercase">Edit</span>
+        </Link>
 
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 bg-red-900/10 hover:bg-red-900/20 text-red-400 hover:text-red-300 border border-red-900/20 hover:border-red-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {deleting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                <span className="text-xs font-medium">...</span>
-              </>
-            ) : (
-              <>
-                <Trash2 className="w-4 h-4 flex-shrink-0" />
-                <span className="text-xs font-medium">Delete</span>
-              </>
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="flex flex-col items-center justify-center gap-1 py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {deleting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              <Trash2 className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase">Delete</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   )
 }
 
-// Optimization: Memoize to prevent re-renders in list views
 export default memo(TeamCard)
