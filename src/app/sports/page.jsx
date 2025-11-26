@@ -9,6 +9,12 @@ import CometCursor from "@/components/ui/CometCursor"; // 2. Import comet cursor
 import { motion } from "framer-motion";
 
 import { FaXTwitter, FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa6";
+import { Nova_Square } from "next/font/google";
+
+const nova = Nova_Square({
+  weight: "400",
+  subsets: ["latin"],
+});
 
 const SportsPage = () => {
   const socials = [
@@ -50,7 +56,7 @@ const SportsPage = () => {
   return (
     <>
       {/* --- Page Content (z-10) --- */}
-      <main className="relative z-10">
+      <main className={`relative z-10 ${nova.className}`}>
         {/* --- Countdown Section --- */}
         <section className="h-screen w-screen flex flex-col justify-center items-center relative">
           <img
