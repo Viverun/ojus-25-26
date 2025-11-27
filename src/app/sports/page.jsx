@@ -44,12 +44,12 @@ const SportsPage = () => {
     {
       name: "Indoor",
       activities: ["Gaming", "Badminton", "Table Tennis", "Chess"],
-      link: "/indoor",
+      link: "/sports/indoor",
     },
     {
       name: "Outdoor",
       activities: ["Cricket", "Football", "Basketball"],
-      link: "/outdoor",
+      link: "/sports/outdoor",
     },
   ];
 
@@ -176,13 +176,13 @@ const SportsPage = () => {
 
                   <p className="text-gray-300 mb-6">{arena.activities.join(" · ")}</p>
 
-                  <span
+                  <Link href={arena.link}
                     className="text-fuchsia-300 font-medium tracking-wide
               group-hover:text-fuchsia-200 transition-colors
               underline underline-offset-4 decoration-fuchsia-500/50"
                   >
                     Enter →
-                  </span>
+                  </Link>
                 </div>
               </motion.div>
             ))}
