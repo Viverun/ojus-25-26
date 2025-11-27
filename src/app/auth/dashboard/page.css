@@ -1,0 +1,22 @@
+/* dashboard.css
+   NOTE: The majority of styling is handled by Tailwind classes in Dashboard.jsx.
+   This file only contains the custom CSS for the 'custom-scrollbar' class.
+*/
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* width of the scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1e293b; /* bg-slate-800 */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #8b5cf6; /* bg-purple-500 */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a78bfa; /* bg-purple-400 */
+}
