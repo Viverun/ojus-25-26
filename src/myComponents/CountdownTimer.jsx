@@ -25,27 +25,63 @@ const CountdownTimer = ({ targetDate }) => {
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
+
     return () => clearInterval(timer);
   }, [targetDate]);
 
+  const pad = (n) => String(n).padStart(2, "0");
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-10 text-center font-mono tracking-wide place-items-center">
-      {[
-        { label: "Days", value: timeLeft.days },
-        { label: "Hours", value: timeLeft.hours },
-        { label: "Mins", value: timeLeft.minutes },
-        { label: "Secs", value: timeLeft.seconds },
-      ].map((item, i) => (
-        <div
-          key={i}
-          className="flex flex-col items-center px-4 py-3 sm:px-6 sm:py-4 shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[130px]"
-        >
-          <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-1">
-            {String(item.value).padStart(2, "0")}
-          </p>
-          <span className="uppercase text-xs sm:text-sm tracking-widest text-gray-400">{item.label}</span>
+    <div className="p-6">
+      <div
+        className="
+        grid 
+        grid-cols-2 gap-5 
+        text-center 
+        auto-cols-max
+        md:grid-cols-4   /* Desktop = 4 in one row */
+      "
+      >
+        {/* DAYS */}
+        <div className="flex flex-col p-4 bg-neutral rounded-box text-neutral-content">
+          <span className="countdown font-mono text-5xl">
+            <span className="mx-auto" style={{ "--value": timeLeft.days }}>
+              {pad(timeLeft.days)}
+            </span>
+          </span>
+          days
         </div>
-      ))}
+
+        {/* HOURS */}
+        <div className="flex flex-col p-4 bg-neutral rounded-box text-neutral-content">
+          <span className="countdown font-mono text-5xl">
+            <span className="mx-auto" style={{ "--value": timeLeft.hours }}>
+              {pad(timeLeft.hours)}
+            </span>
+          </span>
+          hours
+        </div>
+
+        {/* MINUTES */}
+        <div className="flex flex-col p-4 bg-neutral rounded-box text-neutral-content">
+          <span className="countdown font-mono text-5xl">
+            <span className="mx-auto" style={{ "--value": timeLeft.minutes }}>
+              {pad(timeLeft.minutes)}
+            </span>
+          </span>
+          min
+        </div>
+
+        {/* SECONDS */}
+        <div className="flex flex-col p-4 bg-neutral rounded-box text-neutral-content">
+          <span className="countdown font-mono text-5xl">
+            <span className="mx-auto" style={{ "--value": timeLeft.seconds }}>
+              {pad(timeLeft.seconds)}
+            </span>
+          </span>
+          sec
+        </div>
+      </div>
     </div>
   );
 };

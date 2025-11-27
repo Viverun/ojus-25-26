@@ -1,14 +1,14 @@
-"use client"
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import TeamForm from '../../TeamForm'
-import api from '@/api/api'
-import { useAuth } from '@/context/AuthContext'
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import TeamForm from "../../TeamForm";
+import api from "@/api/api";
+import { useAuth } from "@/context/AuthContext";
 
-export default function CreateTeamPage(){
-  const [status, setStatus] = useState(null)
-  const router = useRouter()
-  const { user, isAuthenticated, loading } = useAuth()
+export default function CreateTeamPage() {
+  const [status, setStatus] = useState(null);
+  const router = useRouter();
+  const { user, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -30,7 +30,10 @@ export default function CreateTeamPage(){
         <div className="text-center">
           <h1 className="text-3xl font-bold text-red-400 mb-4">Access Denied</h1>
           <p className="text-gray-400 mb-8">Only managers can create teams.</p>
-          <a href="/sports/teams/list/all" className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
+          <a
+            href="/sports/teams/list/all"
+            className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg"
+          >
             Back to Teams
           </a>
         </div>
@@ -38,15 +41,15 @@ export default function CreateTeamPage(){
     );
   }
 
-  async function handleSubmit(formData){
-    setStatus('saving')
-    try{
-      const res = await api.post('api/teams/', formData)
-      setStatus({ success: res.data })
-      setTimeout(() => router.push('/sports/teams/list/all'), 2000)
-    }catch(e){
-      const errData = e.response?.data || e.message
-      setStatus({ error: errData })
+  async function handleSubmit(formData) {
+    setStatus("saving");
+    try {
+      const res = await api.post("api/teams/", formData);
+      setStatus({ success: res.data });
+      setTimeout(() => router.push("/sports/teams/list/all"), 2000);
+    } catch (e) {
+      const errData = e.response?.data || e.message;
+      setStatus({ error: errData });
     }
   }
 
@@ -61,10 +64,22 @@ export default function CreateTeamPage(){
         </h1>
         <p className="text-gray-400 mb-8">Set up your sports team</p>
         <TeamForm onSubmit={handleSubmit} submitLabel="Create Team" />
-        {status && status.error && <pre style={{color:'#ff6b6b',marginTop:16,padding:16,backgroundColor:'#1a1a1a',borderRadius:8}}>{JSON.stringify(status.error,null,2)}</pre>}
-        {status === 'saving' && <div style={{color:'#74c0fc',marginTop:16,padding:12,backgroundColor:'#1a1a1a',borderRadius:8}}>Creating team...</div>}
-        {status && status.success && <div style={{color:'#51cf66',marginTop:16,padding:12,backgroundColor:'#1a1a1a',borderRadius:8}}>Team created successfully! Redirecting...</div>}
+        {status && status.error && (
+          <pre style={{ color: "#ff6b6b", marginTop: 16, padding: 16, backgroundColor: "#1a1a1a", borderRadius: 8 }}>
+            {JSON.stringify(status.error, null, 2)}
+          </pre>
+        )}
+        {status === "saving" && (
+          <div style={{ color: "#74c0fc", marginTop: 16, padding: 12, backgroundColor: "#1a1a1a", borderRadius: 8 }}>
+            Creating team...
+          </div>
+        )}
+        {status && status.success && (
+          <div style={{ color: "#51cf66", marginTop: 16, padding: 12, backgroundColor: "#1a1a1a", borderRadius: 8 }}>
+            Team created successfully! Redirecting...
+          </div>
+        )}
       </div>
     </main>
-  )
+  );
 }
