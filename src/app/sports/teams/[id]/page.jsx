@@ -38,7 +38,7 @@ export default function TeamDetails() {
     const fetchTeam = async () => {
       try {
         // Ensure this endpoint matches your backend (e.g., trailing slash)
-        const res = await api.get(`teams/${id}/`);
+        const res = await api.get(`api/teams/${id}/`);
         setTeam(res.data);
       } catch (err) {
         console.error("Fetch Error:", err);

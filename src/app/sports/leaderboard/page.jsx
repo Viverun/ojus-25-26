@@ -65,7 +65,8 @@ export default function DepartmentLeaderboardPage() {
     const fetchLeaderboard = async () => {
       try {
         const res = await api.get('api/leaderboard/department/');
-        setStandings(res.data);
+        setStandings(res.data);   
+        console.log({standingsDAta : res.data});
       } catch (err) {
         console.error(err);
         setError("Unable to load department standings.");
@@ -150,7 +151,7 @@ export default function DepartmentLeaderboardPage() {
             </div>
 
             {/* Rows */}
-            {standings.map((dept, index) => (
+            {standings && standings.map((dept, index) => (
               <motion.div
                 key={dept.branch}
                 initial={{ opacity: 0, x: -20 }}

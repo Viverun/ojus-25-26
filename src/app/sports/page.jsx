@@ -1,3 +1,5 @@
+ 
+
 "use client";
 
 import CountdownTimer from "@/myComponents/CountdownTimer";
@@ -90,6 +92,7 @@ const SportsPage = () => {
 
         {/* --- Arena Section --- */}
         <section
+          id="arena"
           className="min-h-screen w-full flex flex-col justify-center items-center
     bg-[#070B18] relative overflow-hidden px-6 py-24"
           style={{ perspective: "1800px" }}
@@ -239,7 +242,7 @@ const SportsPage = () => {
         </section>
 
         {/* SECTION 4 */}
-        <section className="w-full min-h-screen flex justify-center items-center px-6 sm:px-12 md:px-20 py-16 bg-black text-white">
+        <section  id="leaderboard"  className="w-full min-h-screen flex justify-center items-center px-6 sm:px-12 md:px-20 py-16 bg-black text-white">
           LEADERBOARD SCORE OF PLAYERS AND DEPARTMENT WILL BE SHOWN HERE DURING THE SPORTS EVENT
         </section>
       </main>
