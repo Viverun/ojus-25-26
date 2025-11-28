@@ -64,7 +64,7 @@ export default function CreateTeamPage() {
         </h1>
         <p className="text-gray-400 mb-8">Set up your sports team</p>
         <TeamForm onSubmit={handleSubmit} submitLabel="Create Team" />
-        {status && status.error && (
+        {/* {status && status.error && (
           <pre style={{ color: "#ff6b6b", marginTop: 16, padding: 16, backgroundColor: "#1a1a1a", borderRadius: 8 }}>
             {JSON.stringify(status.error, null, 2)}
           </pre>
@@ -78,7 +78,7 @@ export default function CreateTeamPage() {
           <div style={{ color: "#51cf66", marginTop: 16, padding: 12, backgroundColor: "#1a1a1a", borderRadius: 8 }}>
             Team created successfully! Redirecting...
           </div>
-        )}
+        )} */}
       </div>
     </main>
   );

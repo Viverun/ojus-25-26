@@ -12,6 +12,9 @@ export default function TeamForm({ onSubmit, submitLabel = "Submit", initial = {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // for the add captain id input to hold temp string before adding to actual members array
+  const [memberInput, setMemberInput] = useState("");
+
   useEffect(() => {
     let mounted = true;
     async function fetchSports() {
@@ -55,90 +58,135 @@ export default function TeamForm({ onSubmit, submitLabel = "Submit", initial = {
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
   return (
-    <form onSubmit={submit} style={{ maxWidth: 720 }}>
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: "block", marginBottom: 4 }}>Name</label>
+    <form
+      onSubmit={submit}
+      data-theme="cupcake"
+      className="max-w-[720px] mx-auto p-8 rounded-2xl shadow-2xl bg-base-200/60 backdrop-blur-lg space-y-8 border border-base-300"
+    >
+      <h2 className="text-2xl font-bold text-center mb-4">Team Registration</h2>
+
+      {/* Name */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">Name</span>
+        </label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          style={{ width: "100%", padding: 8, borderRadius: 4 }}
+          className="input input-bordered w-full input-primary"
+          placeholder="Enter your full name"
         />
       </div>
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: "block", marginBottom: 4 }}>Branch</label>
-        <select
-          className="bg-black text-white border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500 rounded-md"
-          value={branch}
-          onChange={(e) => setBranch(e.target.value)}
-          style={{ width: "100%", padding: 8, borderRadius: 4 }}
-        >
-          <option value="COMPS">Computer Engineering</option>
-          <option value="IT">Information Technology</option>
-          <option value="AIML">CSE AI/ML</option>
-          <option value="DS">CSE Data Science</option>
-          <option value="MECH">Mechanical Engineering</option>
-          <option value="CIVIL">Civil Engineering</option>
-        </select>
+
+      {/* Row: Branch + Sport */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Branch */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-semibold">Branch</span>
+          </label>
+
+          <select
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            className="select select-bordered w-full select-primary"
+          >
+            <option value="COMPS">Computer Engineering</option>
+            <option value="IT">Information Technology</option>
+            <option value="AIML">CSE AI/ML</option>
+            <option value="DS">CSE Data Science</option>
+            <option value="MECH">Mechanical Engineering</option>
+            <option value="CIVIL">Civil Engineering</option>
+          </select>
+        </div>
+
+        {/* Sport */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-semibold">Sport</span>
+          </label>
+
+          <select
+            value={sportId}
+            onChange={(e) => setSportId(e.target.value)}
+            required
+            disabled={loading}
+            className="select select-bordered w-full select-primary"
+          >
+            <option value="">Select a sport</option>
+
+            {sports.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: "block", marginBottom: 4 }}>Sport</label>
-        <select
-          className="bg-black text-white border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500 rounded-md"
-          value={sportId}
-          onChange={(e) => setSportId(e.target.value)}
-          required
-          style={{ width: "100%", padding: 8, borderRadius: 4 }}
-          disabled={loading}
-        >
-          <option value="">Select sport</option>
-          {sports.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: "block", marginBottom: 4 }}>Members</label>
-        <button type="button" onClick={addMemberId} style={{ padding: "6px 12px", marginBottom: 8 }}>
-          Add member by id
-        </button>
-        <ul style={{ listStyle: "none", padding: 0 }}>
+
+      {/* Members */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">Team Members</span>
+        </label>
+
+        {/* Input replacing prompt() */}
+        <div className="flex gap-3 mb-4">
+          <input
+            type="number"
+            placeholder="Enter user ID (pk)"
+            value={memberInput}
+            onChange={(e) => setMemberInput(e.target.value)}
+            className="input input-bordered w-full input-secondary"
+          />
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              if (!memberInput.trim()) return;
+              setMemberIds((prev) => [...prev, Number(memberInput)]);
+              setMemberInput(""); // clear input
+            }}
+          >
+            Add
+          </button>
+        </div>
+
+        <ul className="space-y-3">
           {memberIds.map((m) => (
             <li
               key={m}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: 6,
-                border: "1px solid #ddd",
-                marginBottom: 4,
-                borderRadius: 4,
-              }}
+              className="flex justify-between items-center p-3 rounded-lg bg-base-100 border border-base-300 shadow-sm"
             >
-              <span>User ID: {m}</span>
-              <button type="button" onClick={() => removeMemberId(m)} style={{ cursor: "pointer" }}>
+              <span className="text-sm font-medium">User ID: {m}</span>
+              <button type="button" onClick={() => removeMemberId(m)} className="btn btn-error btn-xs">
                 Remove
               </button>
             </li>
           ))}
         </ul>
       </div>
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: "block", marginBottom: 4 }}>Captain (user id, optional)</label>
+
+      {/* Captain */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">Captain (optional)</span>
+        </label>
+
         <input
           value={captainId}
           onChange={(e) => setCaptainId(e.target.value)}
-          placeholder="Leave empty for manager to be captain"
-          style={{ width: "100%", padding: 8, borderRadius: 4 }}
+          placeholder="Leave empty to auto-assign"
+          className="input input-bordered w-full input-accent"
         />
       </div>
-      <div>
-        <button type="submit" style={{ padding: "10px 20px", cursor: "pointer" }}>
-          {submitLabel}
-        </button>
-      </div>
+
+      {/* Submit */}
+      <button type="submit" className="btn btn-primary w-full text-lg mt-4">
+        {submitLabel}
+      </button>
     </form>
   );
 }

@@ -14,22 +14,22 @@ export default function EditTeamPage(){
   const [status, setStatus] = useState(null)
   const { user, isAuthenticated, loading: authLoading } = useAuth()
 
-  useEffect(()=>{
-    let mounted = true
-    async function fetchTeam(){
-      try{
-        const res = await api.get(`api/teams/${id}/`)
-        if(mounted) setTeam(res.data)
-      }catch(e){
-        console.error(e)
-        if (e.response?.status === 401) {
-          router.push("/auth/login");
-        }
-      }finally{ if(mounted) setLoading(false) }
-    }
-    if(id) fetchTeam()
-    return ()=> mounted=false
-  },[id, router])
+  // useEffect(()=>{
+  //   let mounted = true
+  //   async function fetchTeam(){
+  //     try{
+  //       const res = await api.get(`api/teams/${id}/`)
+  //       if(mounted) setTeam(res.data)
+  //     }catch(e){
+  //       console.error(e)
+  //       if (e.response?.status === 401) {
+  //         router.push("/auth/login");
+  //       }
+  //     }finally{ if(mounted) setLoading(false) }
+  //   }
+  //   if(id) fetchTeam()
+  //   return ()=> mounted=false
+  // },[id, router])
 
   if(authLoading || loading) {
     return (
