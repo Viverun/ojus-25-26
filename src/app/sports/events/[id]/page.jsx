@@ -225,6 +225,10 @@ const EventDetailsPage = () => {
   const [message, setMessage] = useState("");
   const [liveParticipantCount, setLiveParticipantCount] = useState(event ? event.participants : 0);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const [isRegistered, setIsRegistered] = useState(false)
+  const [showCreateTeam, setShowCreateTeam] = useState(false)
+  const [showJoinTeam, setShowJoinTeam] = useState(false)
+  const [userTeam, setUserTeam] = useState(null)
 
  useEffect(() => {
     const fetchLiveStats = async () => {
@@ -246,6 +250,125 @@ const EventDetailsPage = () => {
     };
     fetchLiveStats();
   }, [eventId, event]);
+
+  useEffect(()=>{
+    let mounted = true
+    async function checkRegistration(){
+      if(!event || !event.slug) return
+      try{
+        const res = await api.get('api/user-registration-info/')
+        const regs = res.data.registrations || []
+        const found = regs.find(r => r.sport && r.sport.slug === event.slug)
+        if(mounted) setIsRegistered(Boolean(found))
+      }catch(err){
+        console.warn('Could not check registration', err)
+      }
+    }
+    checkRegistration()
+    return ()=> mounted=false
+  }, [event])
+  
+  useEffect(()=>{
+    // if registered, check whether user already belongs to a team in this sport
+    let mounted = true
+    async function checkUserTeam(){
+      if(!event || !event.slug) return
+      try{
+        const res = await api.get(`api/sports/${event.slug}/user-team/`)
+        if(mounted) setUserTeam(res.data)
+          console.log(res.data)
+      }catch(err){
+        console.warn('Could not fetch user team status', err)
+      }
+    }
+    if(isRegistered) checkUserTeam()
+    return ()=> mounted=false
+  }, [isRegistered, event])
+
+  function CreateTeamModal({ open, onClose }){
+    const [name, setName] = useState("")
+    const [branch, setBranch] = useState('COMPS')
+    const [submitting, setSubmitting] = useState(false)
+    if(!open) return null
+
+    async function submit(e){
+      e.preventDefault()
+      setSubmitting(true)
+      try{
+        if(!event?.slug){ throw new Error('Sport slug missing') }
+        const res = await api.post(`api/sports/${event.slug}/teams/create/`, { name, branch })
+        alert('Team created: ' + res.data.name)
+        onClose()
+      }catch(err){
+        console.error(err)
+        alert(err.response?.data?.error || err.message || 'Failed to create team')
+      }finally{ setSubmitting(false) }
+    }
+
+    return (
+      <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <form onSubmit={submit} style={{background:'#0f1724',padding:20,borderRadius:8,minWidth:360,color:'#fff'}}>
+          <h3 style={{marginBottom:12}}>Create Team for {event?.name}</h3>
+          <div style={{marginBottom:8}}>
+            <label style={{display:'block',fontSize:12,opacity:0.8}}>Sport (pre-selected)</label>
+            <input value={event?.name || ''} disabled style={{width:'100%',padding:8,background:'#111827',color:'#fff',border:'1px solid #374151',borderRadius:6}} />
+          </div>
+          <div style={{marginBottom:8}}>
+            <label style={{display:'block',fontSize:12,opacity:0.8}}>Team Name</label>
+            <input value={name} onChange={e=>setName(e.target.value)} required style={{width:'100%',padding:8,borderRadius:6}} />
+          </div>
+          <div style={{marginBottom:8}}>
+            <label style={{display:'block',fontSize:12,opacity:0.8}}>Branch</label>
+            <select value={branch} onChange={e=>setBranch(e.target.value)} style={{width:'100%',padding:8,borderRadius:6}}>
+              <option value="COMPS">COMPS</option>
+              <option value="IT">IT</option>
+              <option value="AIML">AIML</option>
+              <option value="DS">DS</option>
+              <option value="MECH">MECH</option>
+              <option value="CIVIL">CIVIL</option>
+            </select>
+          </div>
+          <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+            <button type="button" onClick={onClose} style={{padding:'8px 12px',borderRadius:6}}>Cancel</button>
+            <button type="submit" disabled={submitting} style={{padding:'8px 12px',borderRadius:6,background:'#7c3aed',color:'#fff'}}>{submitting? 'Creating...':'Create Team'}</button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+  function JoinTeamModal({ open, onClose }){
+    const [teamId, setTeamId] = useState("")
+    const [submitting, setSubmitting] = useState(false)
+    if(!open) return null
+    async function submit(e){
+      e.preventDefault()
+      setSubmitting(true)
+      try{
+        const res = await api.post(`api/teams/${teamId}/join/`)
+        alert('Request sent')
+        onClose()
+      }catch(err){
+        console.error(err)
+        alert(err.response?.data?.error || 'Failed to send join request')
+      }finally{ setSubmitting(false) }
+    }
+    return (
+      <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <form onSubmit={submit} style={{background:'#0f1724',padding:20,borderRadius:8,minWidth:320,color:'#fff'}}>
+          <h3 style={{marginBottom:12}}>Join Team</h3>
+          <div style={{marginBottom:8}}>
+            <label style={{display:'block',fontSize:12,opacity:0.8}}>Team ID</label>
+            <input value={teamId} onChange={e=>setTeamId(e.target.value)} required style={{width:'100%',padding:8,borderRadius:6}} />
+          </div>
+          <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+            <button type="button" onClick={onClose} style={{padding:'8px 12px',borderRadius:6}}>Cancel</button>
+            <button type="submit" disabled={submitting} style={{padding:'8px 12px',borderRadius:6,background:'#059669',color:'#fff'}}>{submitting? 'Sending...':'Send Request'}</button>
+          </div>
+        </form>
+      </div>
+    )
+  }
 
 
   if (authLoading) {
@@ -394,24 +517,38 @@ const EventDetailsPage = () => {
               </div>
 
               {/* Register Button */}
-              <button
-                onClick={handleRegister}
-                disabled={loading || !isAuthenticated}
-                className={`w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
-                  !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {loading
-                  ? "Registering..."
-                  : isAuthenticated
-                  ? "Register for Event"
-                  : "Log in to Register"}
-              </button>
+              {!isRegistered ? (
+                <button
+                  onClick={handleRegister}
+                  disabled={loading || !isAuthenticated}
+                  className={`w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
+                    !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {loading
+                    ? "Registering..."
+                    : isAuthenticated
+                    ? "Register for Event"
+                    : "Log in to Register"}
+                </button>
+              ) : (
+                // If user is already member of a team in this sport, show button linking to that team
+                userTeam && userTeam.in_team ? (
+                  <Link href={`/sports/teams/${userTeam.team.id}`} className="w-full inline-block text-center bg-indigo-600 py-3 rounded-md">{userTeam.team.name}</Link>
+                ) : (
+                  <div style={{display:'flex',gap:8}}>
+                    <button onClick={()=>setShowCreateTeam(true)} className="w-1/2 bg-blue-600 py-3 rounded-md">Create Team</button>
+                    <button onClick={()=>setShowJoinTeam(true)} className="w-1/2 bg-emerald-600 py-3 rounded-md">Join Team</button>
+                  </div>
+                )
+              )}
 
               {/* Status message */}
               {message && (
                 <p className="text-center mt-4 text-sm text-gray-300">{message}</p>
               )}
+              <CreateTeamModal open={showCreateTeam} onClose={()=>setShowCreateTeam(false)} />
+              <JoinTeamModal open={showJoinTeam} onClose={()=>setShowJoinTeam(false)} />
             </div>
           </div>
         </div>
