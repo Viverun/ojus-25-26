@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/api/api";
 import { useAuth } from "@/context/AuthContext";
@@ -51,6 +51,7 @@ export default function TeamDetails() {
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [reqActionLoading, setReqActionLoading] = useState(false);
+  const requestsRef = useRef(null);
   
   async function fetchRequests() {
     if (!id) return;
@@ -90,7 +91,7 @@ export default function TeamDetails() {
   // THIS IS THE CRITICAL ADDITION/CHANGE
   useEffect(() => {
     if (team && user && id && team.manager && user.username === team.manager.username) {
-        fetchRequests();
+      fetchRequests();
     }
   }, [team, user, id]);
 
@@ -119,6 +120,8 @@ export default function TeamDetails() {
   // Check if current user is the captain
   const isCaptain =
     user && team?.captain && user.username === team.captain.username;
+  // Check if current user is the manager
+  const isManager = user && team?.manager && user.username === team.manager.username;
   // Check if current user is already a member
   const isMember =
     user && team?.members?.some((m) => m.username === user.username);
@@ -174,6 +177,18 @@ export default function TeamDetails() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleEdit = () => {
+    router.push(`/sports/teams/${id}/edit`);
+  };
+
+  const handleOpenRequests = () => {
+    // try to fetch latest requests first
+    if (typeof fetchRequests === "function") fetchRequests();
+    // smooth scroll to requests panel if present
+    const el = requestsRef.current || document.getElementById("team-requests");
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   // --- Render States ---
@@ -354,19 +369,40 @@ export default function TeamDetails() {
                 </h3>
 
                 <div className="space-y-3">
-                  {isCaptain ? (
-                    <button
-                      onClick={handleDelete}
-                      disabled={actionLoading}
-                      className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-4 rounded-xl font-semibold transition-all hover:scale-[1.02]"
-                    >
-                      {actionLoading ? (
-                        <span className="animate-spin">⌛</span>
-                      ) : (
-                        <Trash2 className="w-5 h-5" />
-                      )}
-                      Disband Team
-                    </button>
+                  {isManager ? (
+                    <div className="space-y-3">
+                      <button
+                        onClick={handleEdit}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-xl font-semibold transition-all"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M4 21h4l11-11a2.828 2.828 0 0 0 0-4l-2-2a2.828 2.828 0 0 0-4 0L6 15v4z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Edit Team
+                      </button>
+
+                      <button
+                        onClick={handleOpenRequests}
+                        className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 py-3 rounded-xl font-semibold transition-all"
+                      >
+                        <ShieldAlert className="w-5 h-5 text-slate-200" />
+                        Manage Requests
+                        {requests.length > 0 && (
+                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-emerald-500 text-xs text-white">{requests.length}</span>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={handleDelete}
+                        disabled={actionLoading}
+                        className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-3 rounded-xl font-semibold transition-all hover:scale-[1.02]"
+                      >
+                        {actionLoading ? (
+                          <span className="animate-spin">⌛</span>
+                        ) : (
+                          <Trash2 className="w-5 h-5" />
+                        )}
+                        Disband Team
+                      </button>
+                    </div>
                   ) : isMember ? (
                     <button
                       onClick={handleLeave}
@@ -426,7 +462,7 @@ export default function TeamDetails() {
 
               {/* Pending Requests - visible only to team manager */}
               {user && team?.manager && user.username === team.manager.username && (
-                <div className="mt-6 bg-slate-900/40 border border-white/5 rounded-2xl p-4">
+                <div id="team-requests" ref={requestsRef} className="mt-6 bg-slate-900/40 border border-white/5 rounded-2xl p-4">
                   <h4 className="text-sm font-bold text-white mb-3">
                     Pending Join Requests
                   </h4>

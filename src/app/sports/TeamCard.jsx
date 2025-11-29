@@ -1,10 +1,13 @@
 "use client"
 import Link from 'next/link'
 import { useState, useEffect, memo } from 'react'
+import { useAuth } from '@/context/AuthContext'
 import api from '@/api/api'
 import { Users, Trophy, MapPin, UserCircle, Shield, Eye, Edit3, Trash2, Loader2 } from 'lucide-react'
 
 function TeamCard({ team, onDeleted }) {
+  const { user } = useAuth()
+  const isManager = user && team?.manager && user.username === team.manager.username
   const [deleting, setDeleting] = useState(false)
   const [showRequests, setShowRequests] = useState(false)
   const [requests, setRequests] = useState([])
@@ -144,36 +147,39 @@ function TeamCard({ team, onDeleted }) {
           <Eye className="w-4 h-4" />
           <span className="text-[10px] font-bold uppercase">View</span>
         </Link>
+        {isManager && (
+          <>
+            <Link
+              href={`/sports/teams/${team.id}/edit`}
+              className="flex flex-col items-center justify-center gap-1 py-3 text-blue-400 hover:text-blue-300 hover:bg-blue-900/10 transition-colors"
+            >
+              <Edit3 className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase">Edit</span>
+            </Link>
 
-        <Link
-          href={`/sports/teams/${team.id}/edit`}
-          className="flex flex-col items-center justify-center gap-1 py-3 text-blue-400 hover:text-blue-300 hover:bg-blue-900/10 transition-colors"
-        >
-          <Edit3 className="w-4 h-4" />
-          <span className="text-[10px] font-bold uppercase">Edit</span>
-        </Link>
-
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="flex flex-col items-center justify-center gap-1 py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {deleting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <>
-              <Trash2 className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase">Delete</span>
-            </>
-          )}
-        </button>
-        <button
-          onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setShowRequests(true); fetchRequests(); }}
-          className="flex flex-col items-center justify-center gap-1 py-3 text-amber-300 hover:text-amber-200 hover:bg-amber-900/6 transition-colors"
-        >
-          <Shield className="w-4 h-4" />
-          <span className="text-[10px] font-bold uppercase">Requests</span>
-        </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex flex-col items-center justify-center gap-1 py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {deleting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  <span className="text-[10px] font-bold uppercase">Delete</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setShowRequests(true); fetchRequests(); }}
+              className="flex flex-col items-center justify-center gap-1 py-3 text-amber-300 hover:text-amber-200 hover:bg-amber-900/6 transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase">Requests</span>
+            </button>
+          </>
+        )}
       </div>
 
       {showRequests && (
